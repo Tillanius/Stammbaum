@@ -1,1378 +1,518 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#f5f6f2">
-<title>Familienatlas – Mein Stammbaum</title>
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Familienatlas</title>
 <style>
-:root {
-  --green: #355c50;
-  --background: #f5f6f2;
-  --border: #dce3dc;
-  --text: #26342e;
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: Inter, system-ui, sans-serif;
-  color: var(--text);
-  background: var(--background);
-  overflow: hidden;
-}
-
-button, input { font: inherit; }
-
-button {
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: white;
-  color: #304139;
-  border-radius: 9px;
-  padding: 9px 13px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-button:hover { background: #f0f4ef; }
-
-button.primary {
-  background: var(--green);
-  color: white;
-  border-color: var(--green);
-}
-
-header {
-  height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 20px;
-  background: white;
-  border-bottom: 1px solid var(--border);
-  gap: 12px;
-  position: relative;
-  z-index: 10;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-}
-
-.brand-icon {
-  width: 40px;
-  height: 40px;
-  background: var(--green);
-  color: white;
-  border-radius: 11px;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
-}
-
-.brand strong {
-  font-family: Georgia, serif;
-  font-size: 22px;
-}
-
-.brand small {
-  display: block;
-  font-size: 10px;
-  letter-spacing: .12em;
-  color: #77847b;
-  text-transform: uppercase;
-}
-
-.actions {
-  display: flex;
-  gap: 7px;
-  flex-wrap: wrap;
-}
-
-.workspace {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  height: calc(100dvh - 70px);
-}
-
-.workspace:not(.has-selection) {
-  grid-template-columns: 1fr;
-}
-
-.workspace:not(.has-selection) .sidebar {
-  display: none;
-}
-
-/* ZEICHENFLÄCHE */
-
-.canvas {
-  position: relative;
-  overflow: hidden;
-  min-width: 0;
-  background-color: #f8f9f6;
-  background-image: radial-gradient(#d8ded7 .8px, transparent .8px);
-  background-size: 22px 22px;
-  touch-action: none;
-  overscroll-behavior: none;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.world {
-  position: absolute;
-  width: 4000px;
-  height: 3000px;
-  left: 0;
-  top: 0;
-  transform-origin: 0 0;
-}
-
-#links {
-  position: absolute;
-  width: 4000px;
-  height: 3000px;
-  overflow: visible;
-  pointer-events: none;
-}
-
-#nodes {
-  position: absolute;
-  inset: 0;
-}
-
-/* PERSONENKÄSTEN */
-
-.person {
-  position: absolute;
-  width: 190px;
-  height: 112px;
-  min-width: 150px;
-  min-height: 100px;
-  padding: 15px;
-  border: 1.5px solid #cbd4cc;
-  border-radius: 13px;
-  box-shadow: 0 5px 18px #25382b12;
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  overflow: visible;
-}
-
-.person.selected {
-  outline: 2px solid var(--green);
-  outline-offset: 3px;
-}
-
-.person .name {
-  font-family: Georgia, serif;
-  font-size: 19px;
-  font-weight: 600;
-  color: #263b32;
-  margin-bottom: 9px;
-  overflow-wrap: anywhere;
-}
-
-.person .dates {
-  font-size: 12px;
-  color: #647168;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
-
-.person .dot {
-  width: 8px;
-  height: 8px;
-  display: inline-block;
-  border-radius: 50%;
-  margin-right: 6px;
-}
-
-.person[data-tone="white"] { background: white; }
-.person[data-tone="sage"] { background: #e8f0e8; }
-.person[data-tone="blue"] { background: #e8eef5; }
-.person[data-tone="rose"] { background: #f5e9e7; }
-.person[data-tone="sand"] { background: #f4efdf; }
-.person[data-tone="lavender"] { background: #efebf6; }
-
-.person[data-tone="white"] .dot { background: #9ba79e; }
-.person[data-tone="sage"] .dot { background: #668b70; }
-.person[data-tone="blue"] .dot { background: #6d8eae; }
-.person[data-tone="rose"] .dot { background: #b77c78; }
-.person[data-tone="sand"] .dot { background: #b39a57; }
-.person[data-tone="lavender"] .dot { background: #8c7cab; }
-
-/* GRÖSSENÄNDERUNG */
-
-.resize-handle {
-  position: absolute;
-  width: 32px;
-  height: 32px;
-  right: 2px;
-  bottom: 2px;
-  border-radius: 5px;
-  cursor: nwse-resize;
-  touch-action: none;
-  background:
-    linear-gradient(135deg, transparent 45%, #789083 46%, #789083 55%, transparent 56%),
-    linear-gradient(135deg, transparent 65%, #789083 66%, #789083 75%, transparent 76%);
-}
-
-/* SIDEBAR */
-
-.sidebar {
-  background: white;
-  border-left: 1px solid var(--border);
-  padding: 22px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 17px;
-  overflow-y: auto;
-}
-
-.panel-title {
-  font-family: Georgia, serif;
-  font-size: 21px;
-  margin: 0;
-}
-
-.muted {
-  color: #7b867e;
-  font-size: 12px;
-  line-height: 1.5;
-  margin-top: -12px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #778279;
-}
-
-.field input {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 10px;
-  font-size: 13px;
-  background: white;
-}
-
-.field input:focus {
-  outline: 2px solid #9eb6a7;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.colors {
-  display: flex;
-  gap: 9px;
-  flex-wrap: wrap;
-}
-
-.swatch {
-  width: 29px;
-  height: 29px;
-  border-radius: 8px;
-  padding: 0;
-  border: 2px solid white;
-  box-shadow: 0 0 0 1px #ccd5cc;
-}
-
-.swatch[aria-pressed="true"] {
-  box-shadow: 0 0 0 2px var(--green);
-}
-
-hr {
-  border: 0;
-  border-top: 1px solid #edf0ec;
-  width: 100%;
-}
-
-.side-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.side-actions button { flex: 1; }
-
-.tip {
-  background: #f2f5f0;
-  border-radius: 11px;
-  padding: 12px;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #617066;
-}
-
-.status {
-  font-size: 11px;
-  color: #7c877f;
-  margin-top: auto;
-}
-
-/* BEDIENELEMENTE */
-
-.canvas-tools {
-  position: absolute;
-  z-index: 5;
-  left: 15px;
-  top: 15px;
-  display: flex;
-  gap: 6px;
-  background: white;
-  padding: 6px;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-}
-
-.zoom {
-  position: absolute;
-  right: 15px;
-  bottom: 15px;
-  z-index: 5;
-  display: flex;
-  gap: 5px;
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  padding: 5px;
-}
-
-.empty-hint {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #87928a;
-  text-align: center;
-  pointer-events: none;
-  display: none;
-}
-
-.empty-hint strong {
-  display: block;
-  color: #52645a;
-  margin-bottom: 7px;
-}
-
-@media(max-width:850px) {
-  header {
-    height: auto;
-    min-height: 70px;
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .workspace {
-    height: calc(100dvh - 125px);
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    position: absolute;
-    z-index: 8;
-    right: 0;
-    top: 125px;
-    bottom: 0;
-    width: min(340px, 90vw);
-    border-left: 1px solid var(--border);
-    box-shadow: -5px 0 20px #00000012;
-  }
-
-  .workspace.has-selection .canvas {
-    width: 100%;
-  }
-}
-
-@media(max-width:520px) {
-  .actions button {
-    font-size: 11px;
-    padding: 8px;
-  }
-
-  .brand strong { font-size: 19px; }
+*{box-sizing:border-box}
+body{margin:0;font:15px system-ui;background:#f4f1eb;color:#292820}
+header{padding:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fffdf9;position:relative;z-index:3}
+h1{font-size:19px;margin:0 12px 0 0}
+button{padding:9px 12px;border:1px solid #d5cdbf;border-radius:9px;background:white;font:inherit}
+button.primary{background:#526b5d;color:white}
+#board{position:fixed;inset:58px 0 0;overflow:hidden;touch-action:none;background-image:radial-gradient(#cfc6b8 1px,transparent 1px);background-size:22px 22px}
+#world{position:absolute;width:3000px;height:2200px;transform-origin:0 0}
+svg{position:absolute;inset:0;width:3000px;height:2200px;pointer-events:none}
+.person{position:absolute;width:190px;min-height:105px;padding:12px;border:2px solid #879a8c;border-radius:13px;background:var(--bg,#fffdf9);box-shadow:0 5px 18px #30281922;touch-action:none;user-select:none}
+.person strong{display:block;overflow-wrap:anywhere}
+.dates,.note{font-size:12px;color:#777;margin-top:5px}
+.resize{position:absolute;right:0;bottom:0;width:32px;height:32px;touch-action:none;background:linear-gradient(135deg,transparent 48%,#9a907f 49%,#9a907f 55%,transparent 56%,transparent 68%,#9a907f 69%,#9a907f 75%,transparent 76%)}
+#panel{display:none;position:fixed;z-index:5;top:70px;left:10px;width:min(330px,calc(100vw - 20px));max-height:80vh;overflow:auto;padding:14px;background:#fffdf9;border:1px solid #ddd;border-radius:13px;box-shadow:0 5px 20px #0002}
+#panel.open{display:block}
+label{display:block;font-size:12px;color:#777;margin:9px 0 4px}
+input,select,textarea{width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;font:inherit}
+select[multiple]{height:170px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.hint{font-size:13px;color:#666}
+#zoom{position:fixed;right:10px;bottom:10px;z-index:4;display:flex;gap:6px}
+@media(max-width:600px){
+header h1{width:100%}
+header button{font-size:12px;padding:8px}
+#board{top:94px}
 }
 </style>
 </head>
-
 <body>
 
 <header>
-  <div class="brand">
-    <div class="brand-icon">⌘</div>
-    <div>
-      <strong>Familienatlas</strong>
-      <small>Dein Stammbaum, frei gestaltet</small>
-    </div>
-  </div>
-
-  <div class="actions">
-    <button class="primary" id="addBtn">＋ Person</button>
-    <button id="saveBtn">↓ Exportieren</button>
-    <button id="loadBtn">↑ Importieren</button>
-    <input type="file" id="fileInput" accept=".json" hidden>
-  </div>
+<h1>Familienatlas</h1>
+<button class="primary" id="add">＋ Person</button>
+<button id="relation">＋ Beziehung</button>
+<button id="center">Zentrieren</button>
+<button id="export">Export</button>
+<label style="margin:0">Import
+<input id="file" type="file" accept="application/json" hidden>
+</label>
 </header>
 
-<div class="workspace" id="workspace">
+<div id="board">
+<div id="world">
+<svg id="lines"></svg>
+</div>
+</div>
 
-  <main class="canvas" id="canvas">
+<div id="panel">
+<h3 id="heading">Person</h3>
 
-    <div class="canvas-tools">
-      <button id="fitBtn">⌖ Ansicht</button>
-      <button id="resetBtn">↺ Beispiel</button>
-    </div>
+<section id="personForm">
+<label>Name</label>
+<input id="name">
 
-    <div class="world" id="world">
-      <svg id="links"></svg>
-      <div id="nodes"></div>
-    </div>
+<label>Geburt</label>
+<input id="birth" placeholder="z. B. 1980">
 
-    <div class="empty-hint" id="emptyHint">
-      <strong>Deine Familiengeschichte beginnt hier</strong>
-      Füge deine erste Person hinzu.
-    </div>
+<label>Sterbejahr</label>
+<input id="death">
 
-    <div class="zoom">
-      <button id="zoomOut">−</button>
-      <button id="zoomLabel">100%</button>
-      <button id="zoomIn">＋</button>
-    </div>
+<label>Notiz</label>
+<textarea id="note"></textarea>
 
-  </main>
+<label>Kartenfarbe</label>
+<select id="color">
+<option value="#fffdf9">Creme</option>
+<option value="#e5eee7">Salbei</option>
+<option value="#e6edf6">Hellblau</option>
+<option value="#f5e8d4">Sand</option>
+<option value="#f4e5e8">Rosé</option>
+</select>
 
-  <aside class="sidebar">
+<div class="actions">
+<button class="primary" id="save">Speichern</button>
+<button id="delete">Löschen</button>
+<button id="close">Schließen</button>
+</div>
+</section>
 
-    <h2 class="panel-title">Person bearbeiten</h2>
+<section id="relForm" hidden>
+<p class="hint">
+Wähle mindestens zwei Personen. Bei „Eltern-Kind“ kannst du beispielsweise beide Eltern und ein Kind gemeinsam auswählen. Beziehungen dürfen beliebig viele Personen enthalten.
+</p>
 
-    <p class="muted">
-      Hier kannst du die ausgewählte Person bearbeiten.
-    </p>
+<label>Beziehungsart</label>
+<select id="type">
+<option>Eltern-Kind</option>
+<option>Partnerschaft</option>
+<option>Geschwister</option>
+<option>Verwandtschaft</option>
+<option>Andere</option>
+</select>
 
-    <div class="field">
-      <label for="fullName">Name</label>
-      <input id="fullName" placeholder="Vor- und Nachname">
-    </div>
+<label>Beteiligte Personen (Mehrfachauswahl)</label>
+<select id="members" multiple></select>
 
-    <div class="form-grid">
-      <div class="field">
-        <label for="birth">Geboren</label>
-        <input id="birth" placeholder="z. B. 1960">
-      </div>
+<label>Beschriftung (optional)</label>
+<input id="relname" placeholder="z. B. Eltern">
 
-      <div class="field">
-        <label for="death">Gestorben</label>
-        <input id="death" placeholder="optional">
-      </div>
-    </div>
+<div class="actions">
+<button class="primary" id="saveRel">Beziehung speichern</button>
+<button id="closeRel">Schließen</button>
+</div>
+</section>
+</div>
 
-    <div class="field">
-      <label>Kastenfarbe</label>
-      <div class="colors" id="colors">
-        <button class="swatch" style="background:#fff" data-tone="white"></button>
-        <button class="swatch" style="background:#e8f0e8" data-tone="sage"></button>
-        <button class="swatch" style="background:#e8eef5" data-tone="blue"></button>
-        <button class="swatch" style="background:#f5e9e7" data-tone="rose"></button>
-        <button class="swatch" style="background:#f4efdf" data-tone="sand"></button>
-        <button class="swatch" style="background:#efebf6" data-tone="lavender"></button>
-      </div>
-    </div>
-
-    <hr>
-
-    <h2 class="panel-title">Beziehungen</h2>
-
-    <p class="muted">
-      Du kannst die Beschriftung einer ausgewählten Verbindung ändern.
-    </p>
-
-    <div class="field">
-      <label for="relationName">Bezeichnung</label>
-      <input id="relationName" placeholder="z. B. Mutter von">
-    </div>
-
-    <div class="side-actions">
-      <button id="deleteRelationBtn">Linie löschen</button>
-      <button id="deletePersonBtn">Person löschen</button>
-    </div>
-
-    <div class="tip" id="tip">
-      Apple Pencil: Ziehe von einer Person zur anderen, um eine Beziehung zu zeichnen.
-      Ein Finger bewegt Kästen. Zwei Finger zoomen und verschieben.
-    </div>
-
-    <div class="status" id="status">
-      Lokal gespeichert.
-    </div>
-
-  </aside>
+<div id="zoom">
+<button id="minus">−</button>
+<button id="plus">＋</button>
 </div>
 
 <script>
-(() => {
-"use strict";
+(()=>{
+const $=id=>document.getElementById(id),
+board=$('board'),
+world=$('world'),
+svg=$('lines'),
+panel=$('panel');
 
-const $ = id => document.getElementById(id);
+let people=[],rels=[],seq=1,edit=null,
+scale=1,ox=80,oy=60,pts=new Map(),gesture=null;
 
-const workspace = $("workspace");
-const canvas = $("canvas");
-const world = $("world");
-const nodes = $("nodes");
-const links = $("links");
+const get=id=>people.find(p=>p.id===id);
 
-let people = [];
-let relations = [];
-
-let selected = null;
-let selectedRelation = null;
-let nextId = 1;
-
-let scale = 1;
-let offset = {x:0, y:0};
-
-let drag = null;
-let resizeDrag = null;
-let relationDrag = null;
-
-let touchPoints = new Map();
-let pinch = null;
-let suppressClick = false;
-
-const colors = [
-  "white", "sage", "blue",
-  "rose", "sand", "lavender"
-];
-
-const examplePeople = [
-  {id:1,name:"Mutter",birth:"1960",death:"",tone:"sage",x:370,y:120,w:190,h:112},
-  {id:2,name:"Vater",birth:"1963",death:"",tone:"blue",x:700,y:120,w:190,h:112},
-  {id:3,name:"Sohn",birth:"1986",death:"",tone:"sand",x:180,y:440,w:190,h:112},
-  {id:4,name:"Tochter",birth:"1982",death:"",tone:"rose",x:700,y:440,w:190,h:112}
-];
-
-function example() {
-  people = examplePeople.map(p => ({...p}));
-
-  relations = [
-    {id:1,from:1,to:3,label:"Elternteil von"},
-    {id:2,from:2,to:4,label:"Elternteil von"}
-  ];
-
-  nextId = 5;
-  selected = null;
-  selectedRelation = null;
-
-  render();
-  syncPanel();
-  fit();
-  persist();
-}
-
-function fmt(value) {
-  if (!value) return "";
-  if (/^\d{4}$/.test(value)) return value;
-
-  const d = new Date(value + "T12:00:00");
-  if (isNaN(d)) return value;
-
-  return d.toLocaleDateString("de-DE");
-}
-
-function esc(value) {
-  return String(value || "").replace(
-    /[&<>"']/g,
-    char => ({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#39;"
-    }[char])
-  );
-}
-
-function render() {
-  nodes.innerHTML = "";
-
-  people.forEach(p => {
-    const el = document.createElement("div");
-
-    el.className = "person";
-    if (selected === p.id) el.classList.add("selected");
-
-    el.dataset.id = p.id;
-    el.dataset.tone = colors.includes(p.tone) ? p.tone : "white";
-
-    el.style.left = p.x + "px";
-    el.style.top = p.y + "px";
-    el.style.width = (p.w || 190) + "px";
-    el.style.height = (p.h || 112) + "px";
-
-    el.innerHTML = `
-      <div class="name">
-        <span class="dot"></span>
-        ${esc(p.name || "Unbenannte Person")}
-      </div>
-      <div class="dates">
-        ${p.birth ? "✳ " + fmt(p.birth) : "Geburtsdatum unbekannt"}
-        ${p.death ? "<br>✝ " + fmt(p.death) : ""}
-      </div>
-      <div class="resize-handle"></div>
-    `;
-
-    nodes.appendChild(el);
-  });
-
-  drawLinks();
-  $("emptyHint").style.display = people.length ? "none" : "block";
-}
-
-function drawLinks() {
-  links.innerHTML = "";
-
-  relations.forEach(r => {
-    const a = people.find(p => p.id === r.from);
-    const b = people.find(p => p.id === r.to);
-
-    if (!a || !b) return;
-
-    const x1 = a.x + (a.w || 190) / 2;
-    const y1 = a.y + (a.h || 112);
-    const x2 = b.x + (b.w || 190) / 2;
-    const y2 = b.y;
-    const mid = (y1 + y2) / 2;
-
-    const path = document.createElementNS(
-      "http://www.w3.org/2000/svg", "path"
-    );
-
-    path.setAttribute(
-      "d",
-      `M ${x1} ${y1} C ${x1} ${mid}, ${x2} ${mid}, ${x2} ${y2}`
-    );
-
-    path.setAttribute("fill", "none");
-    path.setAttribute(
-      "stroke",
-      selectedRelation === r.id ? "#b17a39" : "#8da094"
-    );
-    path.setAttribute("stroke-width", "2.5");
-    path.setAttribute("stroke-linecap", "round");
-    path.style.pointerEvents = "stroke";
-    path.style.cursor = "pointer";
-
-    path.addEventListener("click", e => {
-      e.stopPropagation();
-      selectedRelation = r.id;
-      selected = null;
-      syncPanel();
-      render();
-    });
-
-    links.appendChild(path);
-
-    const text = document.createElementNS(
-      "http://www.w3.org/2000/svg", "text"
-    );
-
-    text.setAttribute("x", (x1+x2)/2);
-    text.setAttribute("y", mid-8);
-    text.setAttribute("text-anchor", "middle");
-    text.setAttribute("font-size", "12");
-    text.setAttribute("font-family", "system-ui");
-    text.setAttribute("fill", "#61766a");
-    text.textContent = r.label;
-
-    links.appendChild(text);
-  });
-}
-
-function syncPanel() {
-  workspace.classList.toggle("has-selection", selected !== null);
-
-  const p = people.find(x => x.id === selected);
-
-  $("fullName").value = p?.name || "";
-  $("birth").value = p?.birth || "";
-  $("death").value = p?.death || "";
-
-  $("colors").querySelectorAll("button").forEach(b => {
-    b.setAttribute(
-      "aria-pressed",
-      String(b.dataset.tone === p?.tone)
-    );
-  });
-
-  const r = relations.find(x => x.id === selectedRelation);
-  $("relationName").value = r?.label || "";
-}
-
-function persist() {
-  try {
-    localStorage.setItem(
-      "familienatlas-v2",
-      JSON.stringify({people, relations, nextId})
-    );
-
-    $("status").textContent =
-      "Gespeichert · " + new Date().toLocaleTimeString("de-DE");
-  } catch(e) {
-    $("status").textContent = "Speichern nicht möglich.";
-  }
-}
-
-function addPerson() {
-  const id = nextId++;
-
-  people.push({
-    id,
-    name: "Neue Person",
-    birth: "",
-    death: "",
-    tone: "white",
-    x: 250 + Math.random() * 400,
-    y: 200 + Math.random() * 300,
-    w: 190,
-    h: 112
-  });
-
-  selected = id;
-  selectedRelation = null;
-
-  render();
-  syncPanel();
-  persist();
-}
-
-function updatePerson(key, value) {
-  const p = people.find(x => x.id === selected);
-  if (!p) return;
-
-  p[key] = value;
-  render();
-  syncPanel();
-  persist();
-}
-
-$("fullName").addEventListener("input", e =>
-  updatePerson("name", e.target.value)
+const store=()=>localStorage.setItem(
+'familienatlas-data',
+JSON.stringify({people,rels,seq})
 );
 
-$("birth").addEventListener("change", e =>
-  updatePerson("birth", e.target.value)
+function transform(){
+world.style.transform=`translate(${ox}px,${oy}px) scale(${scale})`;
+}
+
+function draw(){
+world.querySelectorAll('.person').forEach(e=>e.remove());
+
+people.forEach(p=>{
+let e=document.createElement('div');
+e.className='person';
+e.dataset.id=p.id;
+e.style.cssText=
+`left:${p.x}px;top:${p.y}px;width:${p.w}px;min-height:${p.h}px;--bg:${p.color}`;
+
+let n=document.createElement('strong');
+n.textContent=p.name||'Unbenannt';
+
+let d=document.createElement('div');
+d.className='dates';
+d.textContent=[
+p.birth&&'* '+p.birth,
+p.death&&'† '+p.death
+].filter(Boolean).join(' · ');
+
+let note=document.createElement('div');
+note.className='note';
+note.textContent=p.note||'Doppeltippen zum Bearbeiten';
+
+let r=document.createElement('div');
+r.className='resize';
+
+e.append(n,d,note,r);
+e.addEventListener('pointerdown',downCard);
+e.addEventListener('dblclick',()=>editPerson(p.id));
+world.append(e);
+});
+
+drawRelations();
+store();
+}
+
+function drawRelations(){
+svg.innerHTML='';
+
+rels.forEach(r=>{
+let a=r.people.map(get).filter(Boolean);
+if(a.length<2)return;
+
+let cx=a.reduce((s,p)=>s+p.x+p.w/2,0)/a.length;
+let cy=a.reduce((s,p)=>s+p.y+p.h/2,0)/a.length;
+
+a.forEach(p=>{
+let l=document.createElementNS(
+'http://www.w3.org/2000/svg','line'
+);
+l.setAttribute('x1',p.x+p.w/2);
+l.setAttribute('y1',p.y+p.h/2);
+l.setAttribute('x2',cx);
+l.setAttribute('y2',cy);
+l.setAttribute('stroke','#8b7961');
+l.setAttribute('stroke-width','2.5');
+svg.append(l);
+});
+
+if(r.label||r.type){
+let t=document.createElementNS(
+'http://www.w3.org/2000/svg','text'
+);
+t.setAttribute('x',cx+8);
+t.setAttribute('y',cy-8);
+t.setAttribute('fill','#625746');
+t.setAttribute('font-size','13');
+t.textContent=r.label||r.type;
+svg.append(t);
+}
+});
+}
+
+function show(which){
+panel.classList.add('open');
+$('personForm').hidden=which!=='person';
+$('relForm').hidden=which!=='rel';
+$('heading').textContent=
+which==='person'?'Person bearbeiten':'Beziehung hinzufügen';
+}
+
+function editPerson(id){
+let p=get(id);
+edit=id;
+['name','birth','death','note','color'].forEach(k=>{
+$(k).value=p[k]||'';
+});
+show('person');
+}
+
+$('add').onclick=()=>{
+edit=null;
+['name','birth','death','note'].forEach(k=>$(k).value='');
+$('color').value='#fffdf9';
+show('person');
+};
+
+$('save').onclick=()=>{
+let p=edit?get(edit):{
+id:seq++,
+x:120+(people.length%4)*230,
+y:120+Math.floor(people.length/4)*160,
+w:190,h:105
+};
+
+['name','birth','death','note','color'].forEach(k=>{
+p[k]=$(k).value.trim();
+});
+
+if(!edit)people.push(p);
+panel.classList.remove('open');
+draw();
+};
+
+$('delete').onclick=()=>{
+if(!edit)return;
+people=people.filter(p=>p.id!==edit);
+rels=rels.filter(r=>!r.people.includes(edit));
+edit=null;
+panel.classList.remove('open');
+draw();
+};
+
+$('close').onclick=$('closeRel').onclick=()=>{
+panel.classList.remove('open');
+};
+
+$('relation').onclick=()=>{
+if(people.length<2){
+alert('Bitte zuerst mindestens zwei Personen anlegen.');
+return;
+}
+
+let s=$('members');
+s.innerHTML='';
+
+people.forEach(p=>{
+let o=document.createElement('option');
+o.value=p.id;
+o.textContent=p.name;
+s.append(o);
+});
+
+$('relname').value='';
+show('rel');
+};
+
+$('saveRel').onclick=()=>{
+let ids=[...$('members').selectedOptions].map(o=>+o.value);
+
+if(ids.length<2){
+alert('Bitte mindestens zwei Personen auswählen.');
+return;
+}
+
+rels.push({
+type:$('type').value,
+label:$('relname').value,
+people:ids
+});
+
+panel.classList.remove('open');
+draw();
+};
+
+function downCard(e){
+e.stopPropagation();
+
+let p=get(+e.currentTarget.dataset.id);
+e.currentTarget.setPointerCapture(e.pointerId);
+
+gesture={
+kind:e.target.classList.contains('resize')?'size':'move',
+id:p.id,
+x:e.clientX,y:e.clientY,
+px:p.x,py:p.y,w:p.w,h:p.h
+};
+}
+
+function downBoard(e){
+if(e.target.closest('#panel,header,#zoom'))return;
+
+board.setPointerCapture(e.pointerId);
+pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+
+if(pts.size===1){
+gesture={
+kind:'pan',
+x:e.clientX,y:e.clientY,
+ox,oy
+};
+}
+
+if(pts.size===2){
+let a=[...pts.values()];
+gesture={
+kind:'pinch',
+dist:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),
+scale,
+mx:(a[0].x+a[1].x)/2,
+my:(a[0].y+a[1].y)/2,
+ox,oy
+};
+}
+}
+
+board.addEventListener('pointerdown',downBoard);
+
+window.addEventListener('pointermove',e=>{
+if(pts.has(e.pointerId)){
+pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+
+if(pts.size===2&&gesture?.kind==='pinch'){
+let a=[...pts.values()];
+let d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
+let m=(a[0].x+a[1].x)/2;
+let n=(a[0].y+a[1].y)/2;
+
+let s=Math.max(.3,Math.min(2.2,
+gesture.scale*d/gesture.dist));
+
+let wx=(gesture.mx-gesture.ox)/gesture.scale;
+let wy=(gesture.my-gesture.oy)/gesture.scale;
+
+scale=s;
+ox=m-wx*s;
+oy=n-wy*s;
+transform();
+
+}else if(pts.size===1&&gesture?.kind==='pan'){
+ox=gesture.ox+e.clientX-gesture.x;
+oy=gesture.oy+e.clientY-gesture.y;
+transform();
+}
+return;
+}
+
+if(!gesture||!['move','size'].includes(gesture.kind))return;
+
+let p=get(gesture.id);
+let dx=(e.clientX-gesture.x)/scale;
+let dy=(e.clientY-gesture.y)/scale;
+
+if(gesture.kind==='move'){
+p.x=Math.max(0,gesture.px+dx);
+p.y=Math.max(0,gesture.py+dy);
+}else{
+p.w=Math.max(150,gesture.w+dx);
+p.h=Math.max(90,gesture.h+dy);
+}
+
+let el=world.querySelector(`[data-id="${p.id}"]`);
+el.style.left=p.x+'px';
+el.style.top=p.y+'px';
+el.style.width=p.w+'px';
+el.style.minHeight=p.h+'px';
+
+drawLinesOnly();
+});
+
+function drawLinesOnly(){
+svg.innerHTML='';
+
+rels.forEach(r=>{
+let a=r.people.map(get).filter(Boolean);
+if(a.length<2)return;
+
+let x=a.reduce((s,p)=>s+p.x+p.w/2,0)/a.length;
+let y=a.reduce((s,p)=>s+p.y+p.h/2,0)/a.length;
+
+a.forEach(p=>{
+let l=document.createElementNS(
+'http://www.w3.org/2000/svg','line'
+);
+[['x1',p.x+p.w/2],['y1',p.y+p.h/2],
+['x2',x],['y2',y]].forEach(([k,v])=>l.setAttribute(k,v));
+l.setAttribute('stroke','#8b7961');
+l.setAttribute('stroke-width','2.5');
+svg.append(l);
+});
+});
+}
+
+function up(e){
+if(pts.has(e.pointerId)){
+pts.delete(e.pointerId);
+gesture=null;
+
+if(pts.size===1){
+let p=[...pts.values()][0];
+gesture={
+kind:'pan',
+x:p.x,y:p.y,
+ox,oy
+};
+}
+return;
+}
+
+if(gesture&&['move','size'].includes(gesture.kind)){
+store();
+}
+gesture=null;
+}
+
+window.addEventListener('pointerup',up);
+window.addEventListener('pointercancel',up);
+
+$('plus').onclick=()=>{
+scale=Math.min(2.2,scale*1.2);
+transform();
+};
+
+$('minus').onclick=()=>{
+scale=Math.max(.3,scale/1.2);
+transform();
+};
+
+$('center').onclick=()=>{
+if(!people.length)return;
+
+let x=Math.min(...people.map(p=>p.x));
+let y=Math.min(...people.map(p=>p.y));
+let X=Math.max(...people.map(p=>p.x+p.w));
+let Y=Math.max(...people.map(p=>p.y+p.h));
+
+scale=Math.min(
+1.2,
+(board.clientWidth-50)/(X-x+80),
+(board.clientHeight-50)/(Y-y+80)
 );
 
-$("death").addEventListener("change", e =>
-  updatePerson("death", e.target.value)
-);
-
-$("colors").addEventListener("click", e => {
-  const b = e.target.closest("[data-tone]");
-  if (!b || selected === null) return;
-  updatePerson("tone", b.dataset.tone);
-});
-
-$("relationName").addEventListener("input", e => {
-  const r = relations.find(x => x.id === selectedRelation);
-  if (!r) return;
-
-  r.label = e.target.value;
-  drawLinks();
-  persist();
-});
-
-$("deletePersonBtn").onclick = () => {
-  if (selected === null) return;
-  if (!confirm("Diese Person wirklich löschen?")) return;
-
-  people = people.filter(p => p.id !== selected);
-  relations = relations.filter(
-    r => r.from !== selected && r.to !== selected
-  );
-
-  selected = null;
-  selectedRelation = null;
-
-  render();
-  syncPanel();
-  persist();
+ox=(board.clientWidth-(x+X)*scale)/2;
+oy=(board.clientHeight-(y+Y)*scale)/2;
+transform();
 };
 
-$("deleteRelationBtn").onclick = () => {
-  if (selectedRelation === null) return;
-
-  relations = relations.filter(r => r.id !== selectedRelation);
-  selectedRelation = null;
-
-  render();
-  syncPanel();
-  persist();
+$('export').onclick=()=>{
+let a=document.createElement('a');
+let u=URL.createObjectURL(new Blob(
+[JSON.stringify({people,rels,seq},null,2)],
+{type:'application/json'}
+));
+a.href=u;
+a.download='familienatlas.json';
+a.click();
+URL.revokeObjectURL(u);
 };
 
-function selectPerson(id) {
-  selected = id;
-  selectedRelation = null;
-  syncPanel();
-  render();
+$('file').onchange=async e=>{
+try{
+let d=JSON.parse(await e.target.files[0].text());
+people=d.people||[];
+rels=d.rels||[];
+seq=d.seq||1;
+draw();
+$('center').click();
+}catch{
+alert('Datei konnte nicht importiert werden.');
 }
-
-function capturePointer(e) {
-  try {
-    canvas.setPointerCapture(e.pointerId);
-  } catch(err) {}
-}
-
-function startMove(id, e) {
-  const p = people.find(x => x.id === id);
-  if (!p) return;
-
-  selectPerson(id);
-
-  drag = {
-    id,
-    startX: e.clientX,
-    startY: e.clientY,
-    origX: p.x,
-    origY: p.y
-  };
-}
-
-function startResize(id, e) {
-  const p = people.find(x => x.id === id);
-  if (!p) return;
-
-  selectPerson(id);
-
-  resizeDrag = {
-    id,
-    startX: e.clientX,
-    startY: e.clientY,
-    startW: p.w || 190,
-    startH: p.h || 112
-  };
-}
-
-function startRelation(id, e) {
-  relationDrag = {
-    from: id,
-    pointerId: e.pointerId
-  };
-
-  suppressClick = true;
-  capturePointer(e);
-}
-
-function finishRelation(e) {
-  if (!relationDrag) return;
-
-  const from = relationDrag.from;
-  relationDrag = null;
-
-  const hit = document.elementFromPoint(e.clientX, e.clientY);
-  const target = hit?.closest(".person");
-
-  if (target && Number(target.dataset.id) !== from) {
-    const to = Number(target.dataset.id);
-
-    const label = prompt(
-      "Wie soll diese Beziehung heißen?",
-      "Verwandt mit"
-    );
-
-    if (label !== null) {
-      const r = {
-        id: Date.now(),
-        from,
-        to,
-        label: label.trim() || "Verbunden mit"
-      };
-
-      relations.push(r);
-      selected = null;
-      selectedRelation = r.id;
-
-      syncPanel();
-      persist();
-    }
-  }
-
-  render();
-
-  setTimeout(() => {
-    suppressClick = false;
-  }, 150);
-}
-
-// START: FINGER, MAUS UND APPLE PENCIL
-canvas.addEventListener("pointerdown", e => {
-  const card = e.target.closest(".person");
-
-  // APPLE PENCIL: Beziehungen zeichnen
-  if (e.pointerType === "pen") {
-    if (card) {
-      e.preventDefault();
-      startRelation(Number(card.dataset.id), e);
-    }
-    return;
-  }
-
-  // TOUCH: Finger erfassen
-  if (e.pointerType === "touch") {
-    e.preventDefault();
-    capturePointer(e);
-
-    touchPoints.set(e.pointerId, {
-      x: e.clientX,
-      y: e.clientY
-    });
-
-    // Zwei Finger: Zoom und Verschieben
-    if (touchPoints.size === 2) {
-      drag = null;
-      resizeDrag = null;
-
-      const pts = [...touchPoints.values()];
-      const center = {
-        x: (pts[0].x + pts[1].x) / 2,
-        y: (pts[0].y + pts[1].y) / 2
-      };
-
-      const distance = Math.hypot(
-        pts[1].x - pts[0].x,
-        pts[1].y - pts[0].y
-      );
-
-      pinch = {
-        distance,
-        scale,
-        worldX: (center.x - offset.x) / scale,
-        worldY: (center.y - offset.y) / scale
-      };
-
-      return;
-    }
-
-    // Nur ein Finger
-    if (touchPoints.size === 1 && card) {
-      const id = Number(card.dataset.id);
-
-      if (e.target.closest(".resize-handle")) {
-        startResize(id, e);
-      } else {
-        startMove(id, e);
-      }
-    }
-
-    return;
-  }
-
-  // MAUS
-  if (e.pointerType === "mouse" && card) {
-    capturePointer(e);
-
-    const id = Number(card.dataset.id);
-
-    if (e.target.closest(".resize-handle")) {
-      startResize(id, e);
-    } else {
-      startMove(id, e);
-    }
-  }
-}, {passive: false});
-
-// BEWEGUNG
-canvas.addEventListener("pointermove", e => {
-
-  // APPLE PENCIL: Vorschau der Beziehung
-  if (relationDrag && e.pointerType === "pen") {
-    const a = people.find(p => p.id === relationDrag.from);
-    if (!a) return;
-
-    const rect = world.getBoundingClientRect();
-
-    const x1 = a.x + (a.w || 190) / 2;
-    const y1 = a.y + (a.h || 112) / 2;
-    const x2 = (e.clientX - rect.left) / scale;
-    const y2 = (e.clientY - rect.top) / scale;
-
-    drawLinks();
-
-    const line = document.createElementNS(
-      "http://www.w3.org/2000/svg", "path"
-    );
-
-    line.setAttribute("d", `M ${x1} ${y1} L ${x2} ${y2}`);
-    line.setAttribute("stroke", "#b17a39");
-    line.setAttribute("stroke-width", "3");
-    line.setAttribute("stroke-dasharray", "7 5");
-    line.setAttribute("fill", "none");
-
-    links.appendChild(line);
-    return;
-  }
-
-  // TOUCH: Position aktualisieren
-  if (e.pointerType === "touch") {
-    if (!touchPoints.has(e.pointerId)) return;
-
-    touchPoints.set(e.pointerId, {
-      x: e.clientX,
-      y: e.clientY
-    });
-
-    // Zwei Finger: Zoom und Verschieben
-    if (touchPoints.size === 2 && pinch) {
-      const pts = [...touchPoints.values()];
-
-      const center = {
-        x: (pts[0].x + pts[1].x) / 2,
-        y: (pts[0].y + pts[1].y) / 2
-      };
-
-      const distance = Math.hypot(
-        pts[1].x - pts[0].x,
-        pts[1].y - pts[0].y
-      );
-
-      const factor = distance / pinch.distance;
-
-      scale = Math.max(
-        0.25,
-        Math.min(2.5, pinch.scale * factor)
-      );
-
-      offset.x = center.x - pinch.worldX * scale;
-      offset.y = center.y - pinch.worldY * scale;
-
-      applyTransform();
-      return;
-    }
-
-    if (touchPoints.size !== 1) return;
-  }
-
-  // KASTEN GRÖSSER ODER KLEINER ZIEHEN
-  if (resizeDrag) {
-    const p = people.find(x => x.id === resizeDrag.id);
-    if (!p) return;
-
-    p.w = Math.max(
-      150,
-      Math.min(
-        500,
-        resizeDrag.startW +
-        (e.clientX - resizeDrag.startX) / scale
-      )
-    );
-
-    p.h = Math.max(
-      100,
-      Math.min(
-        400,
-        resizeDrag.startH +
-        (e.clientY - resizeDrag.startY) / scale
-      )
-    );
-
-    const el = nodes.querySelector(`[data-id="${p.id}"]`);
-
-    if (el) {
-      el.style.width = p.w + "px";
-      el.style.height = p.h + "px";
-    }
-
-    drawLinks();
-    suppressClick = true;
-    return;
-  }
-
-  // PERSONENKASTEN VERSCHIEBEN
-  if (drag) {
-    const p = people.find(x => x.id === drag.id);
-    if (!p) return;
-
-    p.x = Math.max(
-      0,
-      drag.origX + (e.clientX - drag.startX) / scale
-    );
-
-    p.y = Math.max(
-      0,
-      drag.origY + (e.clientY - drag.startY) / scale
-    );
-
-    const el = nodes.querySelector(`[data-id="${p.id}"]`);
-
-    if (el) {
-      el.style.left = p.x + "px";
-      el.style.top = p.y + "px";
-    }
-
-    drawLinks();
-    suppressClick = true;
-  }
-});
-
-// ENDE EINER BERÜHRUNG
-function finishPointer(e) {
-  if (relationDrag && e.pointerType === "pen") {
-    finishRelation(e);
-    return;
-  }
-
-  if (e.pointerType === "touch") {
-    touchPoints.delete(e.pointerId);
-
-    drag = null;
-    resizeDrag = null;
-    pinch = null;
-
-    if (touchPoints.size === 0) persist();
-    return;
-  }
-
-  if (resizeDrag) {
-    resizeDrag = null;
-    persist();
-  }
-
-  if (drag) {
-    drag = null;
-    persist();
-  }
-}
-
-canvas.addEventListener("pointerup", finishPointer);
-
-canvas.addEventListener("pointercancel", e => {
-  touchPoints.delete(e.pointerId);
-
-  drag = null;
-  resizeDrag = null;
-  relationDrag = null;
-  pinch = null;
-
-  drawLinks();
-});
-
-// LEERE FLÄCHE ANTIPPen
-canvas.addEventListener("click", e => {
-  if (suppressClick) {
-    suppressClick = false;
-    return;
-  }
-
-  if (
-    e.target === canvas ||
-    e.target === world ||
-    e.target === links ||
-    e.target === nodes
-  ) {
-    selected = null;
-    selectedRelation = null;
-    syncPanel();
-    render();
-  }
-});
-
-// ZOOM
-function applyTransform() {
-  world.style.transform =
-    `translate(${offset.x}px,${offset.y}px) scale(${scale})`;
-
-  $("zoomLabel").textContent =
-    Math.round(scale * 100) + "%";
-}
-
-function zoomAtCenter(change) {
-  const rect = canvas.getBoundingClientRect();
-  const cx = rect.width / 2;
-  const cy = rect.height / 2;
-
-  const wx = (cx - offset.x) / scale;
-  const wy = (cy - offset.y) / scale;
-
-  scale = Math.max(0.25, Math.min(2.5, scale + change));
-
-  offset.x = cx - wx * scale;
-  offset.y = cy - wy * scale;
-
-  applyTransform();
-}
-
-$("zoomIn").onclick = () => zoomAtCenter(0.15);
-$("zoomOut").onclick = () => zoomAtCenter(-0.15);
-
-// STAMMBAUM EINPASSEN
-function fit() {
-  if (!people.length) return;
-
-  const minX = Math.min(...people.map(p => p.x));
-  const minY = Math.min(...people.map(p => p.y));
-
-  const maxX = Math.max(...people.map(p => p.x + (p.w || 190)));
-  const maxY = Math.max(...people.map(p => p.y + (p.h || 112)));
-
-  const rect = canvas.getBoundingClientRect();
-
-  scale = Math.min(
-    1.2,
-    (rect.width - 100) / (maxX - minX + 100),
-    (rect.height - 100) / (maxY - minY + 100)
-  );
-
-  scale = Math.max(0.25, scale);
-
-  offset.x =
-    (rect.width - (maxX - minX) * scale) / 2 - minX * scale;
-
-  offset.y =
-    (rect.height - (maxY - minY) * scale) / 2 - minY * scale;
-
-  applyTransform();
-}
-
-$("fitBtn").onclick = fit;
-
-$("resetBtn").onclick = () => {
-  if (confirm("Beispiel-Stammbaum wiederherstellen?")) {
-    example();
-  }
 };
 
-// EXPORT
-$("saveBtn").onclick = () => {
-  const blob = new Blob(
-    [JSON.stringify({people, relations, nextId}, null, 2)],
-    {type: "application/json"}
-  );
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-
-  a.href = url;
-  a.download = "mein-stammbaum.json";
-  a.click();
-
-  URL.revokeObjectURL(url);
-};
-
-// IMPORT
-$("loadBtn").onclick = () => $("fileInput").click();
-
-$("fileInput").onchange = e => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-
-  reader.onload = () => {
-    try {
-      const data = JSON.parse(reader.result);
-
-      if (
-        !Array.isArray(data.people) ||
-        !Array.isArray(data.relations)
-      ) {
-        throw new Error("Ungültige Datei");
-      }
-
-      people = data.people.map(p => ({
-        w: 190,
-        h: 112,
-        ...p
-      }));
-
-      relations = data.relations;
-
-      nextId = Math.max(
-        0,
-        ...people.map(p => Number(p.id) || 0)
-      ) + 1;
-
-      selected = null;
-      selectedRelation = null;
-
-      render();
-      syncPanel();
-      fit();
-      persist();
-
-    } catch(err) {
-      alert("Die Datei konnte nicht gelesen werden.");
-    }
-
-    e.target.value = "";
-  };
-
-  reader.readAsText(file);
-};
-
-$("addBtn").onclick = addPerson;
-
-// GESPEICHERTE DATEN LADEN
-function loadSaved() {
-  try {
-    const raw = localStorage.getItem("familienatlas-v2");
-
-    if (!raw) {
-      example();
-      return;
-    }
-
-    const data = JSON.parse(raw);
-
-    if (!Array.isArray(data.people)) {
-      example();
-      return;
-    }
-
-    people = data.people.map(p => ({
-      w: 190,
-      h: 112,
-      ...p
-    }));
-
-    relations = Array.isArray(data.relations)
-      ? data.relations
-      : [];
-
-    nextId = data.nextId ||
-      Math.max(0, ...people.map(p => p.id)) + 1;
-
-    render();
-    syncPanel();
-    fit();
-
-  } catch(e) {
-    example();
-  }
+try{
+let d=JSON.parse(localStorage.getItem('familienatlas-data'));
+if(d){
+people=d.people||[];
+rels=d.rels||[];
+seq=d.seq||1;
 }
+}catch{}
 
-window.addEventListener("resize", applyTransform);
-
-loadSaved();
-
+draw();
+transform();
 })();
 </script>
-
 </body>
 </html>
