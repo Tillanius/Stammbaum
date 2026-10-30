@@ -15,9 +15,7 @@
   --text: #26342e;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -27,9 +25,7 @@ body {
   overflow: hidden;
 }
 
-button, input {
-  font: inherit;
-}
+button, input { font: inherit; }
 
 button {
   cursor: pointer;
@@ -42,9 +38,7 @@ button {
   font-weight: 600;
 }
 
-button:hover {
-  background: #f0f4ef;
-}
+button:hover { background: #f0f4ef; }
 
 button.primary {
   background: var(--green);
@@ -124,7 +118,6 @@ header {
   background-color: #f8f9f6;
   background-image: radial-gradient(#d8ded7 .8px, transparent .8px);
   background-size: 22px 22px;
-
   touch-action: none;
   overscroll-behavior: none;
   user-select: none;
@@ -161,13 +154,10 @@ header {
   height: 112px;
   min-width: 150px;
   min-height: 100px;
-
   padding: 15px;
   border: 1.5px solid #cbd4cc;
   border-radius: 13px;
-
   box-shadow: 0 5px 18px #25382b12;
-
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -204,24 +194,12 @@ header {
   margin-right: 6px;
 }
 
-.person[data-tone="white"] {
-  background: white;
-}
-.person[data-tone="sage"] {
-  background: #e8f0e8;
-}
-.person[data-tone="blue"] {
-  background: #e8eef5;
-}
-.person[data-tone="rose"] {
-  background: #f5e9e7;
-}
-.person[data-tone="sand"] {
-  background: #f4efdf;
-}
-.person[data-tone="lavender"] {
-  background: #efebf6;
-}
+.person[data-tone="white"] { background: white; }
+.person[data-tone="sage"] { background: #e8f0e8; }
+.person[data-tone="blue"] { background: #e8eef5; }
+.person[data-tone="rose"] { background: #f5e9e7; }
+.person[data-tone="sand"] { background: #f4efdf; }
+.person[data-tone="lavender"] { background: #efebf6; }
 
 .person[data-tone="white"] .dot { background: #9ba79e; }
 .person[data-tone="sage"] .dot { background: #668b70; }
@@ -234,8 +212,8 @@ header {
 
 .resize-handle {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 32px;
+  height: 32px;
   right: 2px;
   bottom: 2px;
   border-radius: 5px;
@@ -333,9 +311,7 @@ hr {
   gap: 8px;
 }
 
-.side-actions button {
-  flex: 1;
-}
+.side-actions button { flex: 1; }
 
 .tip {
   background: #f2f5f0;
@@ -410,10 +386,6 @@ hr {
     grid-template-columns: 1fr;
   }
 
-  .workspace:not(.has-selection) {
-    grid-template-columns: 1fr;
-  }
-
   .sidebar {
     position: absolute;
     z-index: 8;
@@ -436,9 +408,7 @@ hr {
     padding: 8px;
   }
 
-  .brand strong {
-    font-size: 19px;
-  }
+  .brand strong { font-size: 19px; }
 }
 </style>
 </head>
@@ -503,7 +473,6 @@ hr {
     </div>
 
     <div class="form-grid">
-
       <div class="field">
         <label for="birth">Geboren</label>
         <input id="birth" placeholder="z. B. 1960">
@@ -513,32 +482,17 @@ hr {
         <label for="death">Gestorben</label>
         <input id="death" placeholder="optional">
       </div>
-
     </div>
 
     <div class="field">
       <label>Kastenfarbe</label>
-
       <div class="colors" id="colors">
-
-        <button class="swatch" style="background:#fff"
-          data-tone="white"></button>
-
-        <button class="swatch" style="background:#e8f0e8"
-          data-tone="sage"></button>
-
-        <button class="swatch" style="background:#e8eef5"
-          data-tone="blue"></button>
-
-        <button class="swatch" style="background:#f5e9e7"
-          data-tone="rose"></button>
-
-        <button class="swatch" style="background:#f4efdf"
-          data-tone="sand"></button>
-
-        <button class="swatch" style="background:#efebf6"
-          data-tone="lavender"></button>
-
+        <button class="swatch" style="background:#fff" data-tone="white"></button>
+        <button class="swatch" style="background:#e8f0e8" data-tone="sage"></button>
+        <button class="swatch" style="background:#e8eef5" data-tone="blue"></button>
+        <button class="swatch" style="background:#f5e9e7" data-tone="rose"></button>
+        <button class="swatch" style="background:#f4efdf" data-tone="sand"></button>
+        <button class="swatch" style="background:#efebf6" data-tone="lavender"></button>
       </div>
     </div>
 
@@ -552,8 +506,7 @@ hr {
 
     <div class="field">
       <label for="relationName">Bezeichnung</label>
-      <input id="relationName"
-        placeholder="z. B. Mutter von">
+      <input id="relationName" placeholder="z. B. Mutter von">
     </div>
 
     <div class="side-actions">
@@ -575,7 +528,6 @@ hr {
 
 <script>
 (() => {
-
 "use strict";
 
 const $ = id => document.getElementById(id);
@@ -591,11 +543,10 @@ let relations = [];
 
 let selected = null;
 let selectedRelation = null;
-
 let nextId = 1;
 
 let scale = 1;
-let offset = {x:0,y:0};
+let offset = {x:0, y:0};
 
 let drag = null;
 let resizeDrag = null;
@@ -603,84 +554,26 @@ let relationDrag = null;
 
 let touchPoints = new Map();
 let pinch = null;
-
 let suppressClick = false;
 
 const colors = [
-  "white",
-  "sage",
-  "blue",
-  "rose",
-  "sand",
-  "lavender"
+  "white", "sage", "blue",
+  "rose", "sand", "lavender"
 ];
 
-// BEISPIEL-STAMMBAUM
-
 const examplePeople = [
-  {
-    id:1,
-    name:"Mutter",
-    birth:"1960",
-    death:"",
-    tone:"sage",
-    x:370,
-    y:120,
-    w:190,
-    h:112
-  },
-  {
-    id:2,
-    name:"Vater",
-    birth:"1963",
-    death:"",
-    tone:"blue",
-    x:700,
-    y:120,
-    w:190,
-    h:112
-  },
-  {
-    id:3,
-    name:"Sohn",
-    birth:"1986",
-    death:"",
-    tone:"sand",
-    x:180,
-    y:440,
-    w:190,
-    h:112
-  },
-  {
-    id:4,
-    name:"Tochter",
-    birth:"1982",
-    death:"",
-    tone:"rose",
-    x:700,
-    y:440,
-    w:190,
-    h:112
-  }
+  {id:1,name:"Mutter",birth:"1960",death:"",tone:"sage",x:370,y:120,w:190,h:112},
+  {id:2,name:"Vater",birth:"1963",death:"",tone:"blue",x:700,y:120,w:190,h:112},
+  {id:3,name:"Sohn",birth:"1986",death:"",tone:"sand",x:180,y:440,w:190,h:112},
+  {id:4,name:"Tochter",birth:"1982",death:"",tone:"rose",x:700,y:440,w:190,h:112}
 ];
 
 function example() {
-
   people = examplePeople.map(p => ({...p}));
 
   relations = [
-    {
-      id:1,
-      from:1,
-      to:3,
-      label:"Elternteil von"
-    },
-    {
-      id:2,
-      from:2,
-      to:4,
-      label:"Elternteil von"
-    }
+    {id:1,from:1,to:3,label:"Elternteil von"},
+    {id:2,from:2,to:4,label:"Elternteil von"}
   ];
 
   nextId = 5;
@@ -693,25 +586,17 @@ function example() {
   persist();
 }
 
-// DATUM FORMATIEREN
-
 function fmt(value) {
-
   if (!value) return "";
-
   if (/^\d{4}$/.test(value)) return value;
 
   const d = new Date(value + "T12:00:00");
-
   if (isNaN(d)) return value;
 
   return d.toLocaleDateString("de-DE");
 }
 
-// HTML SICHER DARSTELLEN
-
 function esc(value) {
-
   return String(value || "").replace(
     /[&<>"']/g,
     char => ({
@@ -724,26 +609,17 @@ function esc(value) {
   );
 }
 
-// PERSONEN ZEICHNEN
-
 function render() {
-
   nodes.innerHTML = "";
 
   people.forEach(p => {
-
     const el = document.createElement("div");
 
     el.className = "person";
-
-    if (selected === p.id) {
-      el.classList.add("selected");
-    }
+    if (selected === p.id) el.classList.add("selected");
 
     el.dataset.id = p.id;
-    el.dataset.tone = colors.includes(p.tone)
-      ? p.tone
-      : "white";
+    el.dataset.tone = colors.includes(p.tone) ? p.tone : "white";
 
     el.style.left = p.x + "px";
     el.style.top = p.y + "px";
@@ -755,34 +631,24 @@ function render() {
         <span class="dot"></span>
         ${esc(p.name || "Unbenannte Person")}
       </div>
-
       <div class="dates">
         ${p.birth ? "✳ " + fmt(p.birth) : "Geburtsdatum unbekannt"}
         ${p.death ? "<br>✝ " + fmt(p.death) : ""}
       </div>
-
       <div class="resize-handle"></div>
     `;
 
     nodes.appendChild(el);
-
   });
 
   drawLinks();
-
-  $("emptyHint").style.display =
-    people.length ? "none" : "block";
-
+  $("emptyHint").style.display = people.length ? "none" : "block";
 }
 
-// BEZIEHUNGSLINIEN
-
 function drawLinks() {
-
   links.innerHTML = "";
 
   relations.forEach(r => {
-
     const a = people.find(p => p.id === r.from);
     const b = people.find(p => p.id === r.to);
 
@@ -790,15 +656,12 @@ function drawLinks() {
 
     const x1 = a.x + (a.w || 190) / 2;
     const y1 = a.y + (a.h || 112);
-
     const x2 = b.x + (b.w || 190) / 2;
     const y2 = b.y;
-
     const mid = (y1 + y2) / 2;
 
     const path = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "path"
+      "http://www.w3.org/2000/svg", "path"
     );
 
     path.setAttribute(
@@ -806,63 +669,44 @@ function drawLinks() {
       `M ${x1} ${y1} C ${x1} ${mid}, ${x2} ${mid}, ${x2} ${y2}`
     );
 
-    path.setAttribute("fill","none");
-
+    path.setAttribute("fill", "none");
     path.setAttribute(
       "stroke",
-      selectedRelation === r.id
-        ? "#b17a39"
-        : "#8da094"
+      selectedRelation === r.id ? "#b17a39" : "#8da094"
     );
-
-    path.setAttribute("stroke-width","2.5");
-    path.setAttribute("stroke-linecap","round");
-
+    path.setAttribute("stroke-width", "2.5");
+    path.setAttribute("stroke-linecap", "round");
     path.style.pointerEvents = "stroke";
     path.style.cursor = "pointer";
 
     path.addEventListener("click", e => {
-
       e.stopPropagation();
-
       selectedRelation = r.id;
       selected = null;
-
       syncPanel();
       render();
-
     });
 
     links.appendChild(path);
 
     const text = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "text"
+      "http://www.w3.org/2000/svg", "text"
     );
 
-    text.setAttribute("x",(x1+x2)/2);
-    text.setAttribute("y",mid-8);
-    text.setAttribute("text-anchor","middle");
-    text.setAttribute("font-size","12");
-    text.setAttribute("font-family","system-ui");
-    text.setAttribute("fill","#61766a");
-
+    text.setAttribute("x", (x1+x2)/2);
+    text.setAttribute("y", mid-8);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("font-size", "12");
+    text.setAttribute("font-family", "system-ui");
+    text.setAttribute("fill", "#61766a");
     text.textContent = r.label;
 
     links.appendChild(text);
-
   });
-
 }
 
-// BEARBEITUNGSMENÜ
-
 function syncPanel() {
-
-  workspace.classList.toggle(
-    "has-selection",
-    selected !== null
-  );
+  workspace.classList.toggle("has-selection", selected !== null);
 
   const p = people.find(x => x.id === selected);
 
@@ -871,70 +715,43 @@ function syncPanel() {
   $("death").value = p?.death || "";
 
   $("colors").querySelectorAll("button").forEach(b => {
-
     b.setAttribute(
       "aria-pressed",
       String(b.dataset.tone === p?.tone)
     );
-
   });
 
-  const r = relations.find(
-    x => x.id === selectedRelation
-  );
-
+  const r = relations.find(x => x.id === selectedRelation);
   $("relationName").value = r?.label || "";
-
 }
 
-// LOKAL SPEICHERN
-
 function persist() {
-
   try {
-
     localStorage.setItem(
       "familienatlas-v2",
-      JSON.stringify({
-        people,
-        relations,
-        nextId
-      })
+      JSON.stringify({people, relations, nextId})
     );
 
     $("status").textContent =
-      "Gespeichert · " +
-      new Date().toLocaleTimeString("de-DE");
-
+      "Gespeichert · " + new Date().toLocaleTimeString("de-DE");
   } catch(e) {
-
-    $("status").textContent =
-      "Speichern nicht möglich.";
-
+    $("status").textContent = "Speichern nicht möglich.";
   }
-
 }
 
-// PERSON HINZUFÜGEN
-
 function addPerson() {
-
   const id = nextId++;
 
   people.push({
-
     id,
-    name:"Neue Person",
-    birth:"",
-    death:"",
-    tone:"white",
-
-    x:250 + Math.random() * 400,
-    y:200 + Math.random() * 300,
-
-    w:190,
-    h:112
-
+    name: "Neue Person",
+    birth: "",
+    death: "",
+    tone: "white",
+    x: 250 + Math.random() * 400,
+    y: 200 + Math.random() * 300,
+    w: 190,
+    h: 112
   });
 
   selected = id;
@@ -943,76 +760,50 @@ function addPerson() {
   render();
   syncPanel();
   persist();
-
 }
 
-// PERSONEN BEARBEITEN
-
-function updatePerson(key,value) {
-
+function updatePerson(key, value) {
   const p = people.find(x => x.id === selected);
-
   if (!p) return;
 
   p[key] = value;
-
   render();
   syncPanel();
   persist();
-
 }
 
-$("fullName").addEventListener("input",e => {
-  updatePerson("name",e.target.value);
-});
+$("fullName").addEventListener("input", e =>
+  updatePerson("name", e.target.value)
+);
 
-$("birth").addEventListener("change",e => {
-  updatePerson("birth",e.target.value);
-});
+$("birth").addEventListener("change", e =>
+  updatePerson("birth", e.target.value)
+);
 
-$("death").addEventListener("change",e => {
-  updatePerson("death",e.target.value);
-});
+$("death").addEventListener("change", e =>
+  updatePerson("death", e.target.value)
+);
 
-// FARBEN
-
-$("colors").addEventListener("click",e => {
-
+$("colors").addEventListener("click", e => {
   const b = e.target.closest("[data-tone]");
-
-  if (!b || !selected) return;
-
-  updatePerson("tone",b.dataset.tone);
-
+  if (!b || selected === null) return;
+  updatePerson("tone", b.dataset.tone);
 });
 
-// BEZIEHUNGEN BESCHRIFTEN
-
-$("relationName").addEventListener("input",e => {
-
-  const r = relations.find(
-    x => x.id === selectedRelation
-  );
-
+$("relationName").addEventListener("input", e => {
+  const r = relations.find(x => x.id === selectedRelation);
   if (!r) return;
 
   r.label = e.target.value;
-
   drawLinks();
   persist();
-
 });
 
-// PERSON LÖSCHEN
-
 $("deletePersonBtn").onclick = () => {
-
-  if (!selected) return;
-
+  if (selected === null) return;
   if (!confirm("Diese Person wirklich löschen?")) return;
 
   people = people.filter(p => p.id !== selected);
-
   relations = relations.filter(
     r => r.from !== selected && r.to !== selected
   );
@@ -1023,78 +814,82 @@ $("deletePersonBtn").onclick = () => {
   render();
   syncPanel();
   persist();
-
 };
 
-// BEZIEHUNG LÖSCHEN
-
 $("deleteRelationBtn").onclick = () => {
+  if (selectedRelation === null) return;
 
-  if (!selectedRelation) return;
-
-  relations = relations.filter(
-    r => r.id !== selectedRelation
-  );
-
+  relations = relations.filter(r => r.id !== selectedRelation);
   selectedRelation = null;
 
   render();
   syncPanel();
   persist();
-
 };
 
-// PERSON ODER BEZIEHUNG AUSWÄHLEN
-
 function selectPerson(id) {
-
   selected = id;
   selectedRelation = null;
-
   syncPanel();
   render();
-
 }
 
-// APPLE PENCIL: BEZIEHUNG STARTEN
-
-function startRelation(id,e) {
-
-  relationDrag = {
-    from:id,
-    pointerId:e.pointerId
-  };
-
-  suppressClick = true;
-
+function capturePointer(e) {
   try {
     canvas.setPointerCapture(e.pointerId);
   } catch(err) {}
-
 }
 
-// BEZIEHUNG FERTIGSTELLEN
+function startMove(id, e) {
+  const p = people.find(x => x.id === id);
+  if (!p) return;
+
+  selectPerson(id);
+
+  drag = {
+    id,
+    startX: e.clientX,
+    startY: e.clientY,
+    origX: p.x,
+    origY: p.y
+  };
+}
+
+function startResize(id, e) {
+  const p = people.find(x => x.id === id);
+  if (!p) return;
+
+  selectPerson(id);
+
+  resizeDrag = {
+    id,
+    startX: e.clientX,
+    startY: e.clientY,
+    startW: p.w || 190,
+    startH: p.h || 112
+  };
+}
+
+function startRelation(id, e) {
+  relationDrag = {
+    from: id,
+    pointerId: e.pointerId
+  };
+
+  suppressClick = true;
+  capturePointer(e);
+}
 
 function finishRelation(e) {
-
   if (!relationDrag) return;
 
   const from = relationDrag.from;
-
   relationDrag = null;
 
-  const hit = document.elementFromPoint(
-    e.clientX,
-    e.clientY
-  );
-
+  const hit = document.elementFromPoint(e.clientX, e.clientY);
   const target = hit?.closest(".person");
 
-  if (
-    target &&
-    Number(target.dataset.id) !== from
-  ) {
-
+  if (target && Number(target.dataset.id) !== from) {
     const to = Number(target.dataset.id);
 
     const label = prompt(
@@ -1103,290 +898,188 @@ function finishRelation(e) {
     );
 
     if (label !== null) {
-
       const r = {
-        id:Date.now(),
+        id: Date.now(),
         from,
         to,
-        label:label.trim() || "Verbunden mit"
+        label: label.trim() || "Verbunden mit"
       };
 
       relations.push(r);
-
       selected = null;
       selectedRelation = r.id;
 
       syncPanel();
       persist();
-
     }
-
   }
 
   render();
 
   setTimeout(() => {
     suppressClick = false;
-  },100);
-
+  }, 150);
 }
 
-// POINTERDOWN: ALLE EINGABEN
+// START: FINGER, MAUS UND APPLE PENCIL
+canvas.addEventListener("pointerdown", e => {
+  const card = e.target.closest(".person");
 
-canvas.addEventListener("pointerdown",e => {
-
-  // APPLE PENCIL:
-  // Immer Beziehung zeichnen, wenn auf einen Kasten gedrückt wird.
-
+  // APPLE PENCIL: Beziehungen zeichnen
   if (e.pointerType === "pen") {
-
-    const card = e.target.closest(".person");
-
     if (card) {
-
       e.preventDefault();
+      startRelation(Number(card.dataset.id), e);
+    }
+    return;
+  }
 
-      startRelation(
-        Number(card.dataset.id),
-        e
+  // TOUCH: Finger erfassen
+  if (e.pointerType === "touch") {
+    e.preventDefault();
+    capturePointer(e);
+
+    touchPoints.set(e.pointerId, {
+      x: e.clientX,
+      y: e.clientY
+    });
+
+    // Zwei Finger: Zoom und Verschieben
+    if (touchPoints.size === 2) {
+      drag = null;
+      resizeDrag = null;
+
+      const pts = [...touchPoints.values()];
+      const center = {
+        x: (pts[0].x + pts[1].x) / 2,
+        y: (pts[0].y + pts[1].y) / 2
+      };
+
+      const distance = Math.hypot(
+        pts[1].x - pts[0].x,
+        pts[1].y - pts[0].y
       );
 
+      pinch = {
+        distance,
+        scale,
+        worldX: (center.x - offset.x) / scale,
+        worldY: (center.y - offset.y) / scale
+      };
+
+      return;
+    }
+
+    // Nur ein Finger
+    if (touchPoints.size === 1 && card) {
+      const id = Number(card.dataset.id);
+
+      if (e.target.closest(".resize-handle")) {
+        startResize(id, e);
+      } else {
+        startMove(id, e);
+      }
     }
 
     return;
   }
 
-  // FINGER
-
-  if (e.pointerType !== "touch") {
-
-    const card = e.target.closest(".person");
-
-    if (!card) return;
+  // MAUS
+  if (e.pointerType === "mouse" && card) {
+    capturePointer(e);
 
     const id = Number(card.dataset.id);
 
     if (e.target.closest(".resize-handle")) {
-
-      const p = people.find(x => x.id === id);
-
-      resizeDrag = {
-        id,
-        startX:e.clientX,
-        startY:e.clientY,
-        startW:p.w || 190,
-        startH:p.h || 112
-      };
-
-      selectPerson(id);
-
-      try {
-        canvas.setPointerCapture(e.pointerId);
-      } catch(err) {}
-
-      return;
+      startResize(id, e);
+    } else {
+      startMove(id, e);
     }
-
-    selectPerson(id);
-
-    const p = people.find(x => x.id === id);
-
-    drag = {
-      id,
-      startX:e.clientX,
-      startY:e.clientY,
-      origX:p.x,
-      origY:p.y
-    };
-
-    try {
-      canvas.setPointerCapture(e.pointerId);
-    } catch(err) {}
-
-    return;
   }
+}, {passive: false});
 
-  // TOUCH-TRACKING FÜR ZWEI FINGER
+// BEWEGUNG
+canvas.addEventListener("pointermove", e => {
 
-  e.preventDefault();
-
-  touchPoints.set(e.pointerId,{
-    x:e.clientX,
-    y:e.clientY
-  });
-
-  if (touchPoints.size === 2) {
-
-    // Bestehende Einzelbewegung beenden
-    drag = null;
-    resizeDrag = null;
-
-    const pts = [...touchPoints.values()];
-
-    const center = {
-      x:(pts[0].x + pts[1].x)/2,
-      y:(pts[0].y + pts[1].y)/2
-    };
-
-    const distance = Math.hypot(
-      pts[1].x - pts[0].x,
-      pts[1].y - pts[0].y
-    );
-
-    pinch = {
-      distance,
-      scale,
-      worldX:(center.x-offset.x)/scale,
-      worldY:(center.y-offset.y)/scale
-    };
-
-  } else if (touchPoints.size === 1) {
-
-    const card = e.target.closest(".person");
-
-    if (!card) return;
-
-    const id = Number(card.dataset.id);
-
-    // Finger auf dem Größenänderungsgriff
-
-    if (e.target.closest(".resize-handle")) {
-
-      const p = people.find(x => x.id === id);
-
-      resizeDrag = {
-        id,
-        startX:e.clientX,
-        startY:e.clientY,
-        startW:p.w || 190,
-        startH:p.h || 112
-      };
-
-      selectPerson(id);
-      return;
-    }
-
-    // Finger auf einem Personenkasten
-
-    selectPerson(id);
-
-    const p = people.find(x => x.id === id);
-
-    drag = {
-      id,
-      startX:e.clientX,
-      startY:e.clientY,
-      origX:p.x,
-      origY:p.y
-    };
-
-  }
-
-},{passive:false});
-
-// POINTERMOVE: BEWEGEN, ZOOMEN, ZEICHNEN
-
-canvas.addEventListener("pointermove",e => {
-
-  // APPLE PENCIL: VORLÄUFIGE BEZIEHUNG
-
+  // APPLE PENCIL: Vorschau der Beziehung
   if (relationDrag && e.pointerType === "pen") {
-
-    const a = people.find(
-      p => p.id === relationDrag.from
-    );
-
+    const a = people.find(p => p.id === relationDrag.from);
     if (!a) return;
 
     const rect = world.getBoundingClientRect();
 
-    const x1 = a.x + (a.w || 190)/2;
-    const y1 = a.y + (a.h || 112)/2;
-
-    const x2 = (e.clientX-rect.left)/scale;
-    const y2 = (e.clientY-rect.top)/scale;
+    const x1 = a.x + (a.w || 190) / 2;
+    const y1 = a.y + (a.h || 112) / 2;
+    const x2 = (e.clientX - rect.left) / scale;
+    const y2 = (e.clientY - rect.top) / scale;
 
     drawLinks();
 
     const line = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "path"
+      "http://www.w3.org/2000/svg", "path"
     );
 
-    line.setAttribute(
-      "d",
-      `M ${x1} ${y1} L ${x2} ${y2}`
-    );
-
-    line.setAttribute("stroke","#b17a39");
-    line.setAttribute("stroke-width","3");
-    line.setAttribute("stroke-dasharray","7 5");
-    line.setAttribute("fill","none");
+    line.setAttribute("d", `M ${x1} ${y1} L ${x2} ${y2}`);
+    line.setAttribute("stroke", "#b17a39");
+    line.setAttribute("stroke-width", "3");
+    line.setAttribute("stroke-dasharray", "7 5");
+    line.setAttribute("fill", "none");
 
     links.appendChild(line);
-
     return;
   }
 
-  // ZWEI-FINGER-ZOOM UND VERSCHIEBEN
+  // TOUCH: Position aktualisieren
+  if (e.pointerType === "touch") {
+    if (!touchPoints.has(e.pointerId)) return;
 
-  if (
-    e.pointerType === "touch" &&
-    touchPoints.has(e.pointerId)
-  ) {
-
-    touchPoints.set(e.pointerId,{
-      x:e.clientX,
-      y:e.clientY
+    touchPoints.set(e.pointerId, {
+      x: e.clientX,
+      y: e.clientY
     });
 
+    // Zwei Finger: Zoom und Verschieben
     if (touchPoints.size === 2 && pinch) {
-
       const pts = [...touchPoints.values()];
 
       const center = {
-        x:(pts[0].x+pts[1].x)/2,
-        y:(pts[0].y+pts[1].y)/2
+        x: (pts[0].x + pts[1].x) / 2,
+        y: (pts[0].y + pts[1].y) / 2
       };
 
       const distance = Math.hypot(
-        pts[1].x-pts[0].x,
-        pts[1].y-pts[0].y
+        pts[1].x - pts[0].x,
+        pts[1].y - pts[0].y
       );
 
-      const factor = distance/pinch.distance;
+      const factor = distance / pinch.distance;
 
       scale = Math.max(
-        .25,
-        Math.min(2.5,pinch.scale*factor)
+        0.25,
+        Math.min(2.5, pinch.scale * factor)
       );
 
-      offset.x = center.x-pinch.worldX*scale;
-      offset.y = center.y-pinch.worldY*scale;
+      offset.x = center.x - pinch.worldX * scale;
+      offset.y = center.y - pinch.worldY * scale;
 
       applyTransform();
-
+      return;
     }
 
-    return;
+    if (touchPoints.size !== 1) return;
   }
 
-  // KASTEN VERGRÖSSERN
-
+  // KASTEN GRÖSSER ODER KLEINER ZIEHEN
   if (resizeDrag) {
-
-    const p = people.find(
-      x => x.id === resizeDrag.id
-    );
-
+    const p = people.find(x => x.id === resizeDrag.id);
     if (!p) return;
 
     p.w = Math.max(
       150,
       Math.min(
         500,
-        resizeDrag.startW+
-        (e.clientX-resizeDrag.startX)/scale
+        resizeDrag.startW +
+        (e.clientX - resizeDrag.startX) / scale
       )
     );
 
@@ -1394,102 +1087,82 @@ canvas.addEventListener("pointermove",e => {
       100,
       Math.min(
         400,
-        resizeDrag.startH+
-        (e.clientY-resizeDrag.startY)/scale
+        resizeDrag.startH +
+        (e.clientY - resizeDrag.startY) / scale
       )
     );
 
-    const el = nodes.querySelector(
-      `[data-id="${p.id}"]`
-    );
+    const el = nodes.querySelector(`[data-id="${p.id}"]`);
 
     if (el) {
-      el.style.width = p.w+"px";
-      el.style.height = p.h+"px";
+      el.style.width = p.w + "px";
+      el.style.height = p.h + "px";
     }
 
     drawLinks();
+    suppressClick = true;
     return;
-
   }
 
   // PERSONENKASTEN VERSCHIEBEN
-
   if (drag) {
-
-    const p = people.find(
-      x => x.id === drag.id
-    );
-
+    const p = people.find(x => x.id === drag.id);
     if (!p) return;
 
     p.x = Math.max(
       0,
-      drag.origX+
-      (e.clientX-drag.startX)/scale
+      drag.origX + (e.clientX - drag.startX) / scale
     );
 
     p.y = Math.max(
       0,
-      drag.origY+
-      (e.clientY-drag.startY)/scale
+      drag.origY + (e.clientY - drag.startY) / scale
     );
 
-    const el = nodes.querySelector(
-      `[data-id="${p.id}"]`
-    );
+    const el = nodes.querySelector(`[data-id="${p.id}"]`);
 
     if (el) {
-      el.style.left = p.x+"px";
-      el.style.top = p.y+"px";
+      el.style.left = p.x + "px";
+      el.style.top = p.y + "px";
     }
 
     drawLinks();
-
+    suppressClick = true;
   }
-
 });
 
-// POINTERUP
-
+// ENDE EINER BERÜHRUNG
 function finishPointer(e) {
-
   if (relationDrag && e.pointerType === "pen") {
     finishRelation(e);
     return;
   }
 
   if (e.pointerType === "touch") {
-
     touchPoints.delete(e.pointerId);
 
-    if (touchPoints.size < 2) {
-      pinch = null;
-    }
+    drag = null;
+    resizeDrag = null;
+    pinch = null;
 
+    if (touchPoints.size === 0) persist();
+    return;
   }
 
   if (resizeDrag) {
-
     resizeDrag = null;
     persist();
-    return;
-
   }
 
   if (drag) {
-
     drag = null;
     persist();
-
   }
-
 }
 
-canvas.addEventListener("pointerup",finishPointer);
+canvas.addEventListener("pointerup", finishPointer);
 
-canvas.addEventListener("pointercancel",e => {
-
+canvas.addEventListener("pointercancel", e => {
   touchPoints.delete(e.pointerId);
 
   drag = null;
@@ -1498,13 +1171,10 @@ canvas.addEventListener("pointercancel",e => {
   pinch = null;
 
   drawLinks();
-
 });
 
-// LEERE FLÄCHE ANTIPpen
-
-canvas.addEventListener("click",e => {
-
+// LEERE FLÄCHE ANTIPPen
+canvas.addEventListener("click", e => {
   if (suppressClick) {
     suppressClick = false;
     return;
@@ -1516,133 +1186,86 @@ canvas.addEventListener("click",e => {
     e.target === links ||
     e.target === nodes
   ) {
-
     selected = null;
     selectedRelation = null;
-
     syncPanel();
     render();
-
   }
-
 });
 
 // ZOOM
-
 function applyTransform() {
-
   world.style.transform =
     `translate(${offset.x}px,${offset.y}px) scale(${scale})`;
 
   $("zoomLabel").textContent =
-    Math.round(scale*100)+"%";
-
+    Math.round(scale * 100) + "%";
 }
 
-$("zoomIn").onclick = () => {
-
+function zoomAtCenter(change) {
   const rect = canvas.getBoundingClientRect();
+  const cx = rect.width / 2;
+  const cy = rect.height / 2;
 
-  const cx = rect.width/2;
-  const cy = rect.height/2;
+  const wx = (cx - offset.x) / scale;
+  const wy = (cy - offset.y) / scale;
 
-  const wx = (cx-offset.x)/scale;
-  const wy = (cy-offset.y)/scale;
+  scale = Math.max(0.25, Math.min(2.5, scale + change));
 
-  scale = Math.min(2.5,scale+.15);
-
-  offset.x = cx-wx*scale;
-  offset.y = cy-wy*scale;
+  offset.x = cx - wx * scale;
+  offset.y = cy - wy * scale;
 
   applyTransform();
+}
 
-};
+$("zoomIn").onclick = () => zoomAtCenter(0.15);
+$("zoomOut").onclick = () => zoomAtCenter(-0.15);
 
-$("zoomOut").onclick = () => {
-
-  const rect = canvas.getBoundingClientRect();
-
-  const cx = rect.width/2;
-  const cy = rect.height/2;
-
-  const wx = (cx-offset.x)/scale;
-  const wy = (cy-offset.y)/scale;
-
-  scale = Math.max(.25,scale-.15);
-
-  offset.x = cx-wx*scale;
-  offset.y = cy-wy*scale;
-
-  applyTransform();
-
-};
-
-// GESAMTEN STAMMBAUM ANZEIGEN
-
+// STAMMBAUM EINPASSEN
 function fit() {
-
   if (!people.length) return;
 
-  const minX = Math.min(...people.map(p=>p.x));
-  const minY = Math.min(...people.map(p=>p.y));
+  const minX = Math.min(...people.map(p => p.x));
+  const minY = Math.min(...people.map(p => p.y));
 
-  const maxX = Math.max(
-    ...people.map(p=>p.x+(p.w||190))
-  );
-
-  const maxY = Math.max(
-    ...people.map(p=>p.y+(p.h||112))
-  );
+  const maxX = Math.max(...people.map(p => p.x + (p.w || 190)));
+  const maxY = Math.max(...people.map(p => p.y + (p.h || 112)));
 
   const rect = canvas.getBoundingClientRect();
 
   scale = Math.min(
     1.2,
-    (rect.width-100)/(maxX-minX+100),
-    (rect.height-100)/(maxY-minY+100)
+    (rect.width - 100) / (maxX - minX + 100),
+    (rect.height - 100) / (maxY - minY + 100)
   );
 
-  scale = Math.max(.25,scale);
+  scale = Math.max(0.25, scale);
 
   offset.x =
-    (rect.width-(maxX-minX)*scale)/2-minX*scale;
+    (rect.width - (maxX - minX) * scale) / 2 - minX * scale;
 
   offset.y =
-    (rect.height-(maxY-minY)*scale)/2-minY*scale;
+    (rect.height - (maxY - minY) * scale) / 2 - minY * scale;
 
   applyTransform();
-
 }
 
 $("fitBtn").onclick = fit;
 
-// BEISPIEL ZURÜCKSETZEN
-
 $("resetBtn").onclick = () => {
-
   if (confirm("Beispiel-Stammbaum wiederherstellen?")) {
     example();
   }
-
 };
 
 // EXPORT
-
 $("saveBtn").onclick = () => {
-
-  const data = {
-    people,
-    relations,
-    nextId
-  };
-
   const blob = new Blob(
-    [JSON.stringify(data,null,2)],
-    {type:"application/json"}
+    [JSON.stringify({people, relations, nextId}, null, 2)],
+    {type: "application/json"}
   );
 
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement("a");
 
   a.href = url;
@@ -1650,27 +1273,19 @@ $("saveBtn").onclick = () => {
   a.click();
 
   URL.revokeObjectURL(url);
-
 };
 
 // IMPORT
-
-$("loadBtn").onclick = () => {
-  $("fileInput").click();
-};
+$("loadBtn").onclick = () => $("fileInput").click();
 
 $("fileInput").onchange = e => {
-
   const file = e.target.files[0];
-
   if (!file) return;
 
   const reader = new FileReader();
 
   reader.onload = () => {
-
     try {
-
       const data = JSON.parse(reader.result);
 
       if (
@@ -1681,8 +1296,8 @@ $("fileInput").onchange = e => {
       }
 
       people = data.people.map(p => ({
-        w:190,
-        h:112,
+        w: 190,
+        h: 112,
         ...p
       }));
 
@@ -1690,8 +1305,8 @@ $("fileInput").onchange = e => {
 
       nextId = Math.max(
         0,
-        ...people.map(p=>Number(p.id)||0)
-      )+1;
+        ...people.map(p => Number(p.id) || 0)
+      ) + 1;
 
       selected = null;
       selectedRelation = null;
@@ -1702,29 +1317,20 @@ $("fileInput").onchange = e => {
       persist();
 
     } catch(err) {
-
       alert("Die Datei konnte nicht gelesen werden.");
-
     }
 
     e.target.value = "";
-
   };
 
   reader.readAsText(file);
-
 };
-
-// NEUE PERSON
 
 $("addBtn").onclick = addPerson;
 
-// AUTOMATISCHES LADEN
-
+// GESPEICHERTE DATEN LADEN
 function loadSaved() {
-
   try {
-
     const raw = localStorage.getItem("familienatlas-v2");
 
     if (!raw) {
@@ -1740,8 +1346,8 @@ function loadSaved() {
     }
 
     people = data.people.map(p => ({
-      w:190,
-      h:112,
+      w: 190,
+      h: 112,
       ...p
     }));
 
@@ -1750,23 +1356,18 @@ function loadSaved() {
       : [];
 
     nextId = data.nextId ||
-      Math.max(0,...people.map(p=>p.id))+1;
+      Math.max(0, ...people.map(p => p.id)) + 1;
 
     render();
     syncPanel();
     fit();
 
   } catch(e) {
-
     example();
-
   }
-
 }
 
-window.addEventListener("resize",() => {
-  applyTransform();
-});
+window.addEventListener("resize", applyTransform);
 
 loadSaved();
 
