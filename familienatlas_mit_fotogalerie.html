@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f5f7">
+<title>Familienatlas – Dein Stammbaum</title>
+<style>
+:root{--green:#34765a;--dark:#286348;--bg:#f5f5f7;--text:#1d1d1f;--muted:#86868b;--border:#dedee3}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:var(--bg);overflow:hidden}
+button,input{font:inherit}button{cursor:pointer;border:1px solid var(--border);background:white;color:#303036;border-radius:10px;padding:9px 13px;font-size:13px;font-weight:600}
+button:hover{background:#f1f1f4}button.primary{background:var(--green);color:white;border-color:var(--green)}
+header{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:#fffffff2;border-bottom:1px solid var(--border);gap:12px;position:relative;z-index:10}
+.brand{display:flex;align-items:center;gap:12px}.brand-icon{width:40px;height:40px;border-radius:12px;background:var(--green);color:white;display:grid;place-items:center;font-size:22px}
+.brand strong{font-size:21px;letter-spacing:-.5px}.brand small{display:block;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.workspace{height:calc(100dvh - 72px);display:grid;grid-template-columns:minmax(0,1fr) 320px}.workspace:not(.has-selection){grid-template-columns:1fr}.workspace:not(.has-selection) .sidebar{display:none}
+.canvas{position:relative;overflow:hidden;min-width:0;background-color:var(--bg);background-image:radial-gradient(#d9d9df .8px,transparent .8px);background-size:23px 23px;touch-action:none;user-select:none}
+.world{position:absolute;width:4000px;height:3000px;left:0;top:0;transform-origin:0 0}
+#links{position:absolute;width:4000px;height:3000px;overflow:visible;pointer-events:none;z-index:1}
+#nodes{position:absolute;inset:0;z-index:2;pointer-events:none}
+.person{position:absolute;width:190px;height:112px;padding:16px;border:1px solid #00000012;border-radius:15px;box-shadow:0 2px 8px #0000000b;cursor:grab;touch-action:none;user-select:none;pointer-events:auto;overflow:hidden}
+.person:hover{box-shadow:0 5px 16px #00000016;border-color:#34765a55}.person.selected{outline:2px solid var(--green);outline-offset:3px}
+.person .name{font-size:17px;font-weight:650;margin-bottom:9px;overflow-wrap:anywhere}.person .dates{font-size:11.5px;color:#777;line-height:1.7}
+.dot{width:7px;height:7px;display:inline-block;border-radius:50%;margin-right:7px}
+.person[data-tone=white]{background:#fff}.person[data-tone=sage]{background:#edf4ee}.person[data-tone=blue]{background:#edf2f8}.person[data-tone=rose]{background:#f8eeee}.person[data-tone=sand]{background:#f6f2e8}.person[data-tone=lavender]{background:#f1eff8}
+.person[data-tone=white] .dot{background:#999}.person[data-tone=sage] .dot{background:#5e9a70}.person[data-tone=blue] .dot{background:#668bb4}.person[data-tone=rose] .dot{background:#bd7e7e}.person[data-tone=sand] .dot{background:#b59a56}.person[data-tone=lavender] .dot{background:#8b7bb2}
+.resize-handle{position:absolute;width:18px;height:18px;right:3px;bottom:3px;cursor:nwse-resize;background:linear-gradient(135deg,transparent 45%,#789083 46%,#789083 55%,transparent 56%)}
+.sidebar{margin:14px;padding:23px 20px;display:flex;flex-direction:column;gap:16px;overflow:auto;background:#ffffffc9;border:1px solid white;border-radius:20px;box-shadow:0 10px 35px #00000012;min-height:0}
+.panel-title{font-size:20px;margin:0}.muted{color:var(--muted);font-size:12px;line-height:1.5;margin:-10px 0 0}
+.field{display:flex;flex-direction:column;gap:7px}.field label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#777}
+.field input{width:100%;border:1px solid #d2d2da;border-radius:10px;padding:10px;font-size:13px;background:#ffffffb0}
+.colors{display:flex;gap:9px;flex-wrap:wrap}.swatch{width:27px;height:27px;padding:0;border-radius:8px}
+hr{border:0;border-top:1px solid var(--border);width:100%}
+.canvas-tools,.zoom{position:absolute;z-index:5;display:flex;gap:5px;background:#fffffff0;padding:5px;border:1px solid var(--border);border-radius:12px;box-shadow:0 3px 12px #0000000b}
+.canvas-tools{left:14px;top:14px}.zoom{right:14px;bottom:14px}.canvas-tools button,.zoom button{border:0;background:transparent}
+#zoomLabel{min-width:52px;cursor:default}
+.empty-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#898990;pointer-events:none;line-height:1.6}
+.empty-hint strong{display:block;font-size:20px;color:#34343a;margin-bottom:7px}
+.status{font-size:10px;color:#999;margin-top:auto}
+.export-overlay,.photo-overlay{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:18px;background:#191e1b66;backdrop-filter:blur(8px)}
+.export-overlay.open,.photo-overlay.open{display:flex}
+.dialog,.photo-dialog{width:min(650px,100%);max-height:88dvh;overflow:auto;padding:25px;border-radius:22px;background:#fffffff7;box-shadow:0 24px 80px #0003}
+.dialog{width:min(420px,100%)}.dialog h2,.photo-header h2{margin:0 0 8px;font-size:23px}.dialog p,.photo-header p{font-size:12px;color:var(--muted)}
+.export-options{display:grid;gap:9px;margin-top:18px}.export-options button{text-align:left;padding:14px}
+.photo-header{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.photo-header p{margin:0 0 18px}
+.photo-upload{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:24px;border:1.5px dashed #a8c4b0;border-radius:16px;background:#f5f9f6;cursor:pointer}
+.photo-upload:hover,.photo-upload.dragover{background:#e9f3ed;border-color:var(--green)}.photo-upload .upload-icon{font-size:30px}.photo-upload strong{font-size:14px;color:#315d43}.photo-upload small{font-size:11px;color:#85858c;line-height:1.5}.photo-upload input{display:none}
+.gallery-heading{display:flex;justify-content:space-between;margin:23px 0 12px}.gallery-heading h3{margin:0;font-size:15px}.photo-count{font-size:11px;color:var(--muted)}
+.photo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:12px}
+.photo-empty{grid-column:1/-1;text-align:center;padding:25px;background:#f7f7f9;border-radius:12px;color:var(--muted);font-size:12px}
+.photo-card{overflow:hidden;border:1px solid var(--border);border-radius:12px;background:white}.photo-thumb{width:100%;height:125px;border:0;padding:0;border-radius:0;overflow:hidden}.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-card-footer{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:7px}.photo-filename{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#666}.photo-delete{font-size:10px;padding:5px 7px;color:#a94444}
+.photo-status{font-size:11px;color:var(--muted);margin-top:12px}.photo-status.error{color:#b33e3e}
+.lightbox{position:fixed;inset:0;z-index:1100;display:none;align-items:center;justify-content:center;padding:25px;background:#000e}.lightbox.open{display:flex}.lightbox img{max-width:100%;max-height:90dvh;object-fit:contain}.lightbox button{position:absolute;right:16px;top:16px;border-radius:50%;font-size:23px;background:#ffffff30;color:white;border-color:#ffffff55}
+.relation-hub{pointer-events:all;cursor:grab;stroke:white;stroke-width:3}
+@media(max-width:850px){header{height:auto;min-height:72px;align-items:flex-start;flex-direction:column;padding:12px 15px}.workspace{height:calc(100dvh - 120px);grid-template-columns:1fr}.sidebar{position:absolute;z-index:8;right:0;top:120px;bottom:0;width:min(350px,92vw);margin:12px}.workspace:not(.has-selection) .sidebar{display:none}}
+@media(max-width:520px){.actions{width:100%}.actions button{font-size:11px;padding:8px}.workspace{height:calc(100dvh - 120px)}.photo-dialog{padding:18px}.photo-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="brand-icon">♧</div><div><strong>Familienatlas</strong><small>Dein Stammbaum</small></div></div>
+  <div class="actions">
+    <button class="primary" id="addBtn">＋ Person</button>
+    <button id="saveBtn">↓ Exportieren</button>
+    <button id="loadBtn">↑ Importieren</button>
+    <input type="file" id="fileInput" accept=".json" hidden>
+  </div>
+</header>
+<div class="workspace" id="workspace">
+  <main class="canvas" id="canvas">
+    <div class="canvas-tools"><button id="fitBtn">⌖ Ansicht</button><button id="resetBtn">↺ Beispiel</button></div>
+    <div class="world" id="world"><svg id="links"></svg><div id="nodes"></div></div>
+    <div class="empty-hint" id="emptyHint"><strong>Deine Familiengeschichte beginnt hier</strong>Füge deine erste Person hinzu.</div>
+    <div class="zoom"><button id="zoomOut">−</button><button id="zoomLabel">100%</button><button id="zoomIn">＋</button></div>
+  </main>
+  <aside class="sidebar" id="sidebar">
+    <h2 class="panel-title">Person bearbeiten</h2><p class="muted">Doppelklicke auf eine Person, um ihre Fotos zu öffnen.</p>
+    <div class="field"><label for="fullName">Name</label><input id="fullName" placeholder="Vor- und Nachname"></div>
+    <div class="field"><label for="birth">Geboren</label><input id="birth" placeholder="z. B. 1960"></div>
+    <div class="field"><label for="death">Gestorben</label><input id="death" placeholder="optional"></div>
+    <div class="field"><label>Kartenfarbe</label><div class="colors" id="colors">
+      <button class="swatch" style="background:#fff" data-tone="white"></button><button class="swatch" style="background:#edf4ee" data-tone="sage"></button><button class="swatch" style="background:#edf2f8" data-tone="blue"></button><button class="swatch" style="background:#f8eeee" data-tone="rose"></button><button class="swatch" style="background:#f6f2e8" data-tone="sand"></button><button class="swatch" style="background:#f1eff8" data-tone="lavender"></button>
+    </div></div>
+    <hr>
+    <button class="primary" id="openPhotosBtn">📷 Fotos dieser Person</button>
+    <button id="deletePersonBtn">Person löschen</button>
+    <div class="status" id="status">Lokal gespeichert.</div>
+  </aside>
+</div>
+
+<div class="photo-overlay" id="photoOverlay">
+  <section class="photo-dialog" role="dialog" aria-modal="true" aria-labelledby="photoTitle">
+    <div class="photo-header"><div><h2 id="photoTitle">Fotos</h2><p>Persönliche Erinnerungen und Familienfotos</p></div><button id="closePhotoBtn" aria-label="Schließen">×</button></div>
+    <label class="photo-upload" id="photoDropZone"><span class="upload-icon">📷</span><strong>Fotos hinzufügen</strong><small>Hier klicken oder Bilder hierher ziehen<br>Mehrere Bilder gleichzeitig möglich</small><input type="file" id="photoFileInput" accept="image/*" multiple></label>
+    <div class="gallery-heading"><h3>Fotogalerie</h3><span class="photo-count" id="photoCount">0 Fotos</span></div>
+    <div class="photo-gallery" id="photoGallery"><div class="photo-empty">Noch keine Fotos vorhanden.</div></div>
+    <div class="photo-status" id="photoStatus" aria-live="polite"></div>
+  </section>
+</div>
+<div class="lightbox" id="lightbox"><button id="closeLightboxBtn" aria-label="Schließen">×</button><img id="lightboxImage" alt="Familienfoto"></div>
+<div class="export-overlay" id="exportOverlay"><div class="dialog"><h2>Stammbaum exportieren</h2><p>Speichere deinen Stammbaum als JSON-Datei. Die Fotos werden separat im Browser gespeichert.</p><div class="export-options"><button id="exportJsonBtn">Als JSON exportieren</button><button id="exportJpgBtn">Als JPG exportieren</button><button id="exportPdfBtn">Als PDF exportieren</button></div><button id="closeExportBtn" style="width:100%;margin-top:14px">Schließen</button></div></div>
+
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+const canvas=$("canvas"),world=$("world"),nodes=$("nodes"),links=$("links"),workspace=$("workspace");
+let people=[],selected=null,nextId=1,scale=1,offset={x:0,y:0},drag=null,resizeDrag=null,pan=null;
+let db=null,photoURLs=[];
+const tones=["white","sage","blue","rose","sand","lavender"];
+const examples=[
+{id:1,name:"Mutter",birth:"1960",death:"",tone:"sage",x:370,y:120,w:190,h:112},
+{id:2,name:"Vater",birth:"1963",death:"",tone:"blue",x:700,y:120,w:190,h:112},
+{id:3,name:"Sohn",birth:"1986",death:"",tone:"sand",x:180,y:440,w:190,h:112},
+{id:4,name:"Tochter",birth:"1982",death:"",tone:"rose",x:700,y:440,w:190,h:112}
+];
+function key(){return crypto.randomUUID?crypto.randomUUID():"p-"+Date.now()+"-"+Math.random().toString(36).slice(2)}
+function ensureKeys(){people.forEach(p=>{if(!p.photoKey)p.photoKey=key()})}
+function getPerson(id){return people.find(p=>p.id===Number(id))}
+function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmt(v){if(!v)return "";if(/^\d{4}$/.test(v))return v;const d=new Date(v+"T12:00:00");return isNaN(d)?v:d.toLocaleDateString("de-DE")}
+function render(){
+ nodes.innerHTML="";
+ people.forEach(p=>{
+  const el=document.createElement("div");el.className="person"+(selected===p.id?" selected":"");el.dataset.id=p.id;el.dataset.tone=tones.includes(p.tone)?p.tone:"white";
+  el.style.left=p.x+"px";el.style.top=p.y+"px";el.style.width=(p.w||190)+"px";el.style.height=(p.h||112)+"px";
+  el.innerHTML=`<div class="name"><span class="dot"></span>${esc(p.name||"Unbenannte Person")}</div><div class="dates">${p.birth?"✳ "+fmt(p.birth):"Geburtsdatum unbekannt"}${p.death?"<br>✝ "+fmt(p.death):""}</div><div class="resize-handle"></div>`;
+  nodes.appendChild(el);
+ });
+ $("emptyHint").style.display=people.length?"none":"block";
+}
+function sync(){
+ const p=getPerson(selected);workspace.classList.toggle("has-selection",!!p);
+ $("fullName").value=p?.name||"";$("birth").value=p?.birth||"";$("death").value=p?.death||"";
+ $("colors").querySelectorAll("[data-tone]").forEach(b=>b.style.outline=b.dataset.tone===p?.tone?"2px solid #34765a":"none");
+}
+function select(id){selected=id;render();sync()}
+function persist(){
+ try{localStorage.setItem("familienatlas-v3",JSON.stringify({people,nextId}));$("status").textContent="Gespeichert · "+new Date().toLocaleTimeString("de-DE")}
+ catch(e){$("status").textContent="Speichern nicht möglich."}
+}
+function addPerson(){
+ const id=nextId++;people.push({id,name:"Neue Person",birth:"",death:"",tone:"white",x:250+Math.random()*400,y:200+Math.random()*300,w:190,h:112,photoKey:key()});select(id);persist()
+}
+function applyTransform(){world.style.transform=`translate(${offset.x}px,${offset.y}px) scale(${scale})`;$("zoomLabel").textContent=Math.round(scale*100)+"%"}
+function fit(){
+ if(!people.length)return;const minX=Math.min(...people.map(p=>p.x)),minY=Math.min(...people.map(p=>p.y)),maxX=Math.max(...people.map(p=>p.x+(p.w||190))),maxY=Math.max(...people.map(p=>p.y+(p.h||112))),r=canvas.getBoundingClientRect();
+ scale=Math.max(.25,Math.min(1.2,(r.width-100)/(maxX-minX+100),(r.height-100)/(maxY-minY+100)));
+ offset.x=(r.width-(maxX-minX)*scale)/2-minX*scale;offset.y=(r.height-(maxY-minY)*scale)/2-minY*scale;applyTransform()
+}
+function zoomAt(delta){const r=canvas.getBoundingClientRect(),cx=r.width/2,cy=r.height/2,wx=(cx-offset.x)/scale,wy=(cy-offset.y)/scale;scale=Math.max(.25,Math.min(2.5,scale+delta));offset.x=cx-wx*scale;offset.y=cy-wy*scale;applyTransform()}
+function openDB(){
+ if(db)return Promise.resolve(db);
+ return new Promise((resolve,reject)=>{
+  const req=indexedDB.open("familienatlas-fotos",1);
+  req.onupgradeneeded=()=>{const d=req.result;if(!d.objectStoreNames.contains("photos")){const s=d.createObjectStore("photos",{keyPath:"id",autoIncrement:true});s.createIndex("personKey","personKey",{unique:false})}};
+  req.onsuccess=()=>{db=req.result;resolve(db)};req.onerror=()=>reject(req.error||Error("Fotenspeicher konnte nicht geöffnet werden."))
+ })
+}
+function transaction(mode,fn){
+ return openDB().then(database=>new Promise((resolve,reject)=>{
+  const tx=database.transaction("photos",mode),store=tx.objectStore("photos");let result;
+  try{result=fn(store)}catch(e){reject(e);return}
+  tx.oncomplete=()=>resolve(result?.result);tx.onerror=()=>reject(tx.error||Error("Speicherfehler"));tx.onabort=()=>reject(tx.error||Error("Speichervorgang abgebrochen"))
+ }))
+}
+async function addPhoto(personKey,file){
+ if(!file.type.startsWith("image/"))throw Error(file.name+" ist keine Bilddatei.");
+ await transaction("readwrite",s=>s.add({personKey,name:file.name||"Familienfoto",type:file.type,blob:file,created:Date.now()}))
+}
+async function getPhotos(personKey){
+ const database=await openDB();
+ return new Promise((resolve,reject)=>{
+  const tx=database.transaction("photos","readonly"),idx=tx.objectStore("photos").index("personKey"),req=idx.getAll(personKey);
+  req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error)
+ })
+}
+async function deletePhoto(id){await transaction("readwrite",s=>s.delete(Number(id)))}
+function clearPhotoURLs(){photoURLs.forEach(URL.revokeObjectURL);photoURLs=[]}
+async function showPhotos(personId){
+ const p=getPerson(personId);if(!p)return;ensureKeys();photoPersonKey=p.photoKey;
+ $("photoTitle").textContent="Fotos – "+(p.name||"Unbenannte Person");
+ $("photoOverlay").classList.add("open");$("photoStatus").textContent="";await renderPhotos()
+}
+async function renderPhotos(){
+ clearPhotoURLs();const gallery=$("photoGallery");gallery.innerHTML="";
+ try{
+  const photos=await getPhotos(photoPersonKey);$("photoCount").textContent=photos.length+" "+(photos.length===1?"Foto":"Fotos");
+  if(!photos.length){gallery.innerHTML='<div class="photo-empty">Noch keine Fotos vorhanden.<br>Füge oben deine ersten Erinnerungen hinzu.</div>';return}
+  photos.sort((a,b)=>a.created-b.created).forEach(photo=>{
+   const url=URL.createObjectURL(photo.blob);photoURLs.push(url);
+   const card=document.createElement("div");card.className="photo-card";
+   const thumb=document.createElement("button");thumb.className="photo-thumb";thumb.type="button";
+   const img=document.createElement("img");img.src=url;img.alt=photo.name;thumb.appendChild(img);
+   thumb.addEventListener("click",()=>{$("lightboxImage").src=url;$("lightbox").classList.add("open")});
+   const footer=document.createElement("div");footer.className="photo-card-footer";
+   const name=document.createElement("span");name.className="photo-filename";name.textContent=photo.name;
+   const del=document.createElement("button");del.className="photo-delete";del.textContent="Löschen";
+   del.addEventListener("click",async()=>{if(!confirm("Dieses Foto wirklich löschen?"))return;try{await deletePhoto(photo.id);await renderPhotos()}catch(e){photoMessage(e.message,true)}});
+   footer.append(name,del);card.append(thumb,footer);gallery.appendChild(card)
+  })
+ }catch(e){gallery.innerHTML='<div class="photo-empty">Die Fotos konnten nicht geladen werden.</div>';photoMessage(e.message,true)}
+}
+function photoMessage(message,error=false){$("photoStatus").textContent=message;$("photoStatus").classList.toggle("error",error)}
+async function handleFiles(files){
+ const valid=[...files].filter(f=>f.type.startsWith("image/"));if(!valid.length){photoMessage("Bitte wähle eine Bilddatei aus.",true);return}
+ photoMessage("Fotos werden gespeichert …");
+ try{for(const file of valid)await addPhoto(photoPersonKey,file);photoMessage(valid.length+" Foto(s) gespeichert.");await renderPhotos()}
+ catch(e){photoMessage("Speichern fehlgeschlagen: "+e.message,true)}
+}
+function closePhotos(){$("photoOverlay").classList.remove("open");clearPhotoURLs();photoPersonKey=null;$("photoFileInput").value=""}
+function example(){people=examples.map(p=>({...p,photoKey:key()}));nextId=5;selected=null;render();sync();fit();persist()}
+$("addBtn").onclick=addPerson;
+$("fullName").oninput=e=>{const p=getPerson(selected);if(p){p.name=e.target.value;render();persist();if($("photoOverlay").classList.contains("open"))$("photoTitle").textContent="Fotos – "+(p.name||"Unbenannte Person")}};
+$("birth").onchange=e=>{const p=getPerson(selected);if(p){p.birth=e.target.value;render();persist()}};
+$("death").onchange=e=>{const p=getPerson(selected);if(p){p.death=e.target.value;render();persist()}};
+$("colors").onclick=e=>{const b=e.target.closest("[data-tone]"),p=getPerson(selected);if(b&&p){p.tone=b.dataset.tone;render();sync();persist()}};
+$("deletePersonBtn").onclick=async()=>{
+ const p=getPerson(selected);if(!p)return;if(!confirm("Diese Person wirklich löschen?"))return;
+ try{const photos=await getPhotos(p.photoKey);for(const photo of photos)await deletePhoto(photo.id)}catch(e){}
+ people=people.filter(x=>x.id!==selected);selected=null;render();sync();persist()
+};
+$("openPhotosBtn").onclick=()=>selected!==null&&showPhotos(selected);
+$("closePhotoBtn").onclick=closePhotos;
+$("photoOverlay").addEventListener("click",e=>{if(e.target===$("photoOverlay"))closePhotos()});
+$("photoFileInput").addEventListener("change",e=>{handleFiles(e.target.files);e.target.value=""});
+const drop=$("photoDropZone");
+drop.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("dragover")});
+drop.addEventListener("dragleave",()=>drop.classList.remove("dragover"));
+drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("dragover");handleFiles(e.dataTransfer.files)});
+$("closeLightboxBtn").onclick=()=>{$("lightbox").classList.remove("open");$("lightboxImage").src=""};
+$("lightbox").addEventListener("click",e=>{if(e.target===$("lightbox")){$("lightbox").classList.remove("open");$("lightboxImage").src=""}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){$("lightbox").classList.remove("open");if($("photoOverlay").classList.contains("open"))closePhotos();$("exportOverlay").classList.remove("open")}});
+$("fitBtn").onclick=fit;$("zoomIn").onclick=()=>zoomAt(.15);$("zoomOut").onclick=()=>zoomAt(-.15);
+$("resetBtn").onclick=()=>{if(confirm("Beispiel-Stammbaum wiederherstellen?"))example()};
+$("saveBtn").onclick=()=>$("exportOverlay").classList.add("open");$("closeExportBtn").onclick=()=>$("exportOverlay").classList.remove("open");
+$("exportOverlay").addEventListener("click",e=>{if(e.target===$("exportOverlay"))$("exportOverlay").classList.remove("open")});
+function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
+$("exportJsonBtn").onclick=()=>{ensureKeys();download(new Blob([JSON.stringify({people,nextId},null,2)],{type:"application/json"}),"mein-stammbaum.json");$("exportOverlay").classList.remove("open")};
+$("loadBtn").onclick=()=>$("fileInput").click();
+$("fileInput").onchange=e=>{
+ const f=e.target.files[0];if(!f)return;const reader=new FileReader();
+ reader.onload=()=>{try{const d=JSON.parse(reader.result);if(!Array.isArray(d.people))throw Error();people=d.people.map(p=>({w:190,h:112,...p}));ensureKeys();nextId=Math.max(Number(d.nextId)||0,...people.map(p=>Number(p.id)||0))+1;selected=null;render();sync();fit();persist()}catch(err){alert("Die Datei konnte nicht gelesen werden.")}e.target.value=""};reader.readAsText(f)
+};
+function exportImage(type){
+ if(!window.html2canvas){alert("Für JPG/PDF bitte html2canvas laden. Verwende alternativ den JSON-Export.");return}
+ if(!people.length){alert("Der Stammbaum ist leer.");return}
+ const minX=Math.min(...people.map(p=>p.x))-50,minY=Math.min(...people.map(p=>p.y))-50,maxX=Math.max(...people.map(p=>p.x+(p.w||190)))+50,maxY=Math.max(...people.map(p=>p.y+(p.h||112)))+50,w=maxX-minX,h=maxY-minY;
+ const wrap=document.createElement("div");wrap.style.cssText=`position:fixed;left:-20000px;top:0;width:${w}px;height:${h}px;background:#f5f5f7`;
+ const layer=document.createElement("div");layer.style.cssText=`position:relative;width:${w}px;height:${h}px;background-color:#f5f5f7;background-image:radial-gradient(#d9d9df .8px,transparent .8px);background-size:23px 23px`;
+ people.forEach(p=>{const el=document.createElement("div");el.className="person";el.dataset.tone=p.tone||"white";el.style.cssText=`left:${p.x-minX}px;top:${p.y-minY}px;width:${p.w||190}px;height:${p.h||112}px;position:absolute`;el.innerHTML=`<div class="name"><span class="dot"></span>${esc(p.name)}</div><div class="dates">${p.birth?"✳ "+fmt(p.birth):"Geburtsdatum unbekannt"}${p.death?"<br>✝ "+fmt(p.death):""}</div>`;layer.appendChild(el)});
+ wrap.appendChild(layer);document.body.appendChild(wrap);
+ html2canvas(layer,{scale:2,backgroundColor:"#f5f5f7"}).then(c=>{
+  if(type==="jpg")c.toBlob(b=>download(b,"mein-stammbaum.jpg"),"image/jpeg",.95);
+  else{const win=window.open("","_blank");if(!win){alert("Bitte Pop-ups erlauben, um das Druckfenster zu öffnen.");return}win.document.write(`<html><head><title>Stammbaum</title></head><body style="margin:0"><img style="width:100%" src="${c.toDataURL("image/jpeg",.95)}"><script>window.onload=()=>window.print()<\/script></body></html>`);win.document.close()}
+ }).catch(()=>alert("Der Bildexport ist fehlgeschlagen.")).finally(()=>wrap.remove());
+ $("exportOverlay").classList.remove("open")
+}
+$("exportJpgBtn").onclick=()=>exportImage("jpg");$("exportPdfBtn").onclick=()=>exportImage("pdf");
+
+/* Maus: Person auswählen/ziehen, Doppelklick öffnet Fotogalerie */
+canvas.addEventListener("pointerdown",e=>{
+ const card=e.target.closest(".person");
+ if(card){
+  const id=Number(card.dataset.id);select(id);
+  const p=getPerson(id);
+  if(e.target.closest(".resize-handle"))resizeDrag={id,x:e.clientX,y:e.clientY,w:p.w||190,h:p.h||112};
+  else if(e.pointerType==="mouse")drag={id,x:e.clientX,y:e.clientY,px:p.x,py:p.y};
+  try{canvas.setPointerCapture(e.pointerId)}catch(err){}
+ }else if(e.pointerType==="mouse"){pan={x:e.clientX-offset.x,y:e.clientY-offset.y};}
+});
+canvas.addEventListener("pointermove",e=>{
+ if(drag){const p=getPerson(drag.id);if(p){p.x=Math.max(0,drag.px+(e.clientX-drag.x)/scale);p.y=Math.max(0,drag.py+(e.clientY-drag.y)/scale);const el=nodes.querySelector(`[data-id="${p.id}"]`);el.style.left=p.x+"px";el.style.top=p.y+"px"}}
+ else if(resizeDrag){const p=getPerson(resizeDrag.id);if(p){p.w=Math.max(150,resizeDrag.w+(e.clientX-resizeDrag.x)/scale);p.h=Math.max(100,resizeDrag.h+(e.clientY-resizeDrag.y)/scale);const el=nodes.querySelector(`[data-id="${p.id}"]`);el.style.width=p.w+"px";el.style.height=p.h+"px"}}
+ else if(pan){offset.x=e.clientX-pan.x;offset.y=e.clientY-pan.y;applyTransform()}
+});
+function finish(){if(drag||resizeDrag)persist();drag=null;resizeDrag=null;pan=null}
+canvas.addEventListener("pointerup",finish);canvas.addEventListener("pointercancel",finish);
+nodes.addEventListener("dblclick",e=>{const card=e.target.closest(".person");if(card){e.preventDefault();e.stopPropagation();showPhotos(Number(card.dataset.id))}});
+canvas.addEventListener("wheel",e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();zoomAt(e.deltaY<0?.08:-.08)},{passive:false});
+canvas.addEventListener("click",e=>{if(e.target===canvas||e.target===world||e.target===links||e.target===nodes){selected=null;render();sync()}});
+function load(){
+ try{const raw=localStorage.getItem("familienatlas-v3")||localStorage.getItem("familienatlas-v2");if(raw){const d=JSON.parse(raw);if(Array.isArray(d.people)){people=d.people.map(p=>({w:190,h:112,...p}));ensureKeys();nextId=Math.max(Number(d.nextId)||0,...people.map(p=>Number(p.id)||0))+1;render();sync();fit();return}}}catch(e){}
+ example()
+}
+window.addEventListener("resize",applyTransform);
+load();
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</body>
+</html>
