@@ -47,7 +47,7 @@ button.primary {
 }
 
 header {
-  height: 70px;
+  min-height: 70px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -97,7 +97,7 @@ header {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) 320px;
   height: calc(100dvh - 70px);
 }
 
@@ -328,6 +328,62 @@ hr {
   margin-top: auto;
 }
 
+/* BEZIEHUNGSAUSWAHL */
+
+.member-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 9px;
+}
+
+.member-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 3px;
+}
+
+.member-option input {
+  accent-color: var(--green);
+  width: 16px;
+  height: 16px;
+}
+
+.relation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.relation-item {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-weight: 500;
+}
+
+.relation-item.active {
+  border-color: var(--green);
+  background: #edf3ed;
+}
+
+.relation-item small {
+  color: #7b867e;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.side-actions button { min-width: 0; }
+
 /* BEDIENELEMENTE */
 
 .canvas-tools {
@@ -501,21 +557,34 @@ hr {
     <h2 class="panel-title">Beziehungen</h2>
 
     <p class="muted">
-      Du kannst die Beschriftung einer ausgewählten Verbindung ändern.
+      Wähle mehrere Personen aus, um sie zu einer gemeinsamen Beziehung zu verbinden.
     </p>
 
     <div class="field">
       <label for="relationName">Bezeichnung</label>
-      <input id="relationName" placeholder="z. B. Mutter von">
+      <input id="relationName" placeholder="z. B. Eltern von">
+    </div>
+
+    <div class="field">
+      <label>Beteiligte Personen</label>
+      <div class="member-list" id="memberList"></div>
+    </div>
+
+    <button class="primary" id="createRelationBtn">＋ Beziehung erstellen</button>
+
+    <div class="field">
+      <label>Vorhandene Beziehungen</label>
+      <div class="relation-list" id="relationList"></div>
     </div>
 
     <div class="side-actions">
-      <button id="deleteRelationBtn">Linie löschen</button>
+      <button id="deleteRelationBtn">Beziehung löschen</button>
       <button id="deletePersonBtn">Person löschen</button>
     </div>
 
     <div class="tip" id="tip">
-      Apple Pencil: Ziehe von einer Person zur anderen, um eine Beziehung zu zeichnen.
+      Apple Pencil: Ziehe von einer Person zur anderen, um eine Verbindung zu erstellen.
+      Für Beziehungen mit mehreren Personen wähle die Beteiligten in der Seitenleiste aus.
       Ein Finger bewegt Kästen. Zwei Finger zoomen und verschieben.
     </div>
 
@@ -543,6 +612,7 @@ let relations = [];
 
 let selected = null;
 let selectedRelation = null;
+let selectedMembers = [];
 let nextId = 1;
 
 let scale = 1;
@@ -568,17 +638,35 @@ const examplePeople = [
   {id:4,name:"Tochter",birth:"1982",death:"",tone:"rose",x:700,y:440,w:190,h:112}
 ];
 
+function normalizeRelation(r) {
+  let members = Array.isArray(r.members)
+    ? r.members
+    : [r.from, r.to];
+
+  members = [...new Set(
+    members.map(Number).filter(id =>
+      people.some(p => p.id === id)
+    )
+  )];
+
+  return {
+    id: r.id ?? Date.now() + Math.random(),
+    members,
+    label: r.label || "Verbunden mit"
+  };
+}
+
 function example() {
   people = examplePeople.map(p => ({...p}));
 
   relations = [
-    {id:1,from:1,to:3,label:"Elternteil von"},
-    {id:2,from:2,to:4,label:"Elternteil von"}
+    {id:1,members:[1,2,3,4],label:"Eltern und Kinder"}
   ];
 
   nextId = 5;
   selected = null;
   selectedRelation = null;
+  selectedMembers = [];
 
   render();
   syncPanel();
@@ -607,6 +695,48 @@ function esc(value) {
       "'":"&#39;"
     }[char])
   );
+}
+
+function getPerson(id) {
+  return people.find(p => p.id === Number(id));
+}
+
+function getBox(p) {
+  return {
+    left: p.x,
+    top: p.y,
+    right: p.x + (p.w || 190),
+    bottom: p.y + (p.h || 112),
+    cx: p.x + (p.w || 190) / 2,
+    cy: p.y + (p.h || 112) / 2
+  };
+}
+
+/*
+ * Ermittelt den passendsten Randpunkt zwischen zwei Kästen.
+ * Die Linie dockt damit nicht mehr grundsätzlich oben oder unten an.
+ */
+function getAnchor(a, b) {
+  const A = getBox(a);
+  const B = getBox(b);
+
+  const dx = B.cx - A.cx;
+  const dy = B.cy - A.cy;
+
+  const halfW = (a.w || 190) / 2;
+  const halfH = (a.h || 112) / 2;
+
+  if (Math.abs(dx) * halfH > Math.abs(dy) * halfW) {
+    return {
+      x: A.cx + Math.sign(dx || 1) * halfW,
+      y: A.cy
+    };
+  }
+
+  return {
+    x: A.cx,
+    y: A.cy + Math.sign(dy || 1) * halfH
+  };
 }
 
 function render() {
@@ -649,64 +779,209 @@ function drawLinks() {
   links.innerHTML = "";
 
   relations.forEach(r => {
-    const a = people.find(p => p.id === r.from);
-    const b = people.find(p => p.id === r.to);
+    const members = (r.members || [])
+      .map(getPerson)
+      .filter(Boolean);
 
-    if (!a || !b) return;
+    if (members.length < 2) return;
 
-    const x1 = a.x + (a.w || 190) / 2;
-    const y1 = a.y + (a.h || 112);
-    const x2 = b.x + (b.w || 190) / 2;
-    const y2 = b.y;
-    const mid = (y1 + y2) / 2;
+    /*
+     * Ein gemeinsamer Verbindungspunkt wird aus den Mittelpunkten
+     * aller beteiligten Personen berechnet.
+     */
+    const centers = members.map(getBox);
 
-    const path = document.createElementNS(
-      "http://www.w3.org/2000/svg", "path"
+    const center = {
+      x: centers.reduce((sum, b) => sum + b.cx, 0) / centers.length,
+      y: centers.reduce((sum, b) => sum + b.cy, 0) / centers.length
+    };
+
+    const group = document.createElementNS(
+      "http://www.w3.org/2000/svg", "g"
     );
 
-    path.setAttribute(
-      "d",
-      `M ${x1} ${y1} C ${x1} ${mid}, ${x2} ${mid}, ${x2} ${y2}`
+    const isSelected = selectedRelation === r.id;
+
+    members.forEach(p => {
+      const anchor = getAnchor(p, center);
+
+      const path = document.createElementNS(
+        "http://www.w3.org/2000/svg", "path"
+      );
+
+      const dx = center.x - anchor.x;
+      const dy = center.y - anchor.y;
+
+      const bend = Math.min(
+        70,
+        Math.max(25, Math.hypot(dx, dy) * 0.35)
+      );
+
+      let c1x = anchor.x;
+      let c1y = anchor.y;
+      let c2x = center.x;
+      let c2y = center.y;
+
+      if (Math.abs(dx) > Math.abs(dy)) {
+        c1x += Math.sign(dx) * bend;
+        c2x -= Math.sign(dx) * bend;
+      } else {
+        c1y += Math.sign(dy) * bend;
+        c2y -= Math.sign(dy) * bend;
+      }
+
+      path.setAttribute(
+        "d",
+        `M ${anchor.x} ${anchor.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${center.x} ${center.y}`
+      );
+
+      path.setAttribute("fill", "none");
+      path.setAttribute(
+        "stroke",
+        isSelected ? "#b17a39" : "#8da094"
+      );
+      path.setAttribute("stroke-width", "2.5");
+      path.setAttribute("stroke-linecap", "round");
+      path.style.pointerEvents = "stroke";
+      path.style.cursor = "pointer";
+
+      path.addEventListener("click", e => {
+        e.stopPropagation();
+        selectedRelation = r.id;
+        selected = null;
+        selectedMembers = [...r.members];
+        syncPanel();
+        render();
+      });
+
+      group.appendChild(path);
+    });
+
+    const hub = document.createElementNS(
+      "http://www.w3.org/2000/svg", "circle"
     );
 
-    path.setAttribute("fill", "none");
-    path.setAttribute(
-      "stroke",
-      selectedRelation === r.id ? "#b17a39" : "#8da094"
-    );
-    path.setAttribute("stroke-width", "2.5");
-    path.setAttribute("stroke-linecap", "round");
-    path.style.pointerEvents = "stroke";
-    path.style.cursor = "pointer";
+    hub.setAttribute("cx", center.x);
+    hub.setAttribute("cy", center.y);
+    hub.setAttribute("r", "5");
+    hub.setAttribute("fill", isSelected ? "#b17a39" : "#8da094");
+    hub.style.pointerEvents = "all";
+    hub.style.cursor = "pointer";
 
-    path.addEventListener("click", e => {
+    hub.addEventListener("click", e => {
       e.stopPropagation();
       selectedRelation = r.id;
       selected = null;
+      selectedMembers = [...r.members];
       syncPanel();
       render();
     });
 
-    links.appendChild(path);
+    group.appendChild(hub);
 
     const text = document.createElementNS(
       "http://www.w3.org/2000/svg", "text"
     );
 
-    text.setAttribute("x", (x1+x2)/2);
-    text.setAttribute("y", mid-8);
+    text.setAttribute("x", center.x);
+    text.setAttribute("y", center.y - 12);
     text.setAttribute("text-anchor", "middle");
     text.setAttribute("font-size", "12");
     text.setAttribute("font-family", "system-ui");
     text.setAttribute("fill", "#61766a");
+    text.style.pointerEvents = "none";
     text.textContent = r.label;
 
-    links.appendChild(text);
+    group.appendChild(text);
+    links.appendChild(group);
+  });
+}
+
+function renderMemberList() {
+  const list = $("memberList");
+  list.innerHTML = "";
+
+  if (!people.length) {
+    list.textContent = "Noch keine Personen vorhanden.";
+    return;
+  }
+
+  people.forEach(p => {
+    const label = document.createElement("label");
+    label.className = "member-option";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = p.id;
+    checkbox.checked = selectedMembers.includes(p.id);
+
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) {
+        if (!selectedMembers.includes(p.id)) {
+          selectedMembers.push(p.id);
+        }
+      } else {
+        selectedMembers = selectedMembers.filter(id => id !== p.id);
+      }
+    });
+
+    const span = document.createElement("span");
+    span.textContent = p.name || "Unbenannte Person";
+
+    label.appendChild(checkbox);
+    label.appendChild(span);
+    list.appendChild(label);
+  });
+}
+
+function renderRelationList() {
+  const list = $("relationList");
+  list.innerHTML = "";
+
+  if (!relations.length) {
+    list.textContent = "Noch keine Beziehungen vorhanden.";
+    return;
+  }
+
+  relations.forEach(r => {
+    const button = document.createElement("button");
+    button.className = "relation-item";
+
+    if (selectedRelation === r.id) {
+      button.classList.add("active");
+    }
+
+    const names = (r.members || [])
+      .map(getPerson)
+      .filter(Boolean)
+      .map(p => p.name || "Unbenannte Person");
+
+    const title = document.createElement("span");
+    title.textContent = r.label || "Beziehung";
+
+    const detail = document.createElement("small");
+    detail.textContent = names.join(" · ");
+
+    button.appendChild(title);
+    button.appendChild(detail);
+
+    button.addEventListener("click", () => {
+      selectedRelation = r.id;
+      selected = null;
+      selectedMembers = [...r.members];
+      syncPanel();
+      render();
+    });
+
+    list.appendChild(button);
   });
 }
 
 function syncPanel() {
-  workspace.classList.toggle("has-selection", selected !== null);
+  workspace.classList.toggle(
+    "has-selection",
+    selected !== null || selectedRelation !== null
+  );
 
   const p = people.find(x => x.id === selected);
 
@@ -722,13 +997,21 @@ function syncPanel() {
   });
 
   const r = relations.find(x => x.id === selectedRelation);
+
   $("relationName").value = r?.label || "";
+
+  if (r && selectedMembers.length === 0) {
+    selectedMembers = [...r.members];
+  }
+
+  renderMemberList();
+  renderRelationList();
 }
 
 function persist() {
   try {
     localStorage.setItem(
-      "familienatlas-v2",
+      "familienatlas-v3",
       JSON.stringify({people, relations, nextId})
     );
 
@@ -756,6 +1039,7 @@ function addPerson() {
 
   selected = id;
   selectedRelation = null;
+  selectedMembers = [id];
 
   render();
   syncPanel();
@@ -796,31 +1080,86 @@ $("relationName").addEventListener("input", e => {
 
   r.label = e.target.value;
   drawLinks();
+  renderRelationList();
   persist();
 });
 
-$("deletePersonBtn").onclick = () => {
-  if (selected === null) return;
-  if (!confirm("Diese Person wirklich löschen?")) return;
+/* MEHRPERSONEN-BEZIEHUNG ERSTELLEN */
 
-  people = people.filter(p => p.id !== selected);
-  relations = relations.filter(
-    r => r.from !== selected && r.to !== selected
+$("createRelationBtn").onclick = () => {
+  const members = [...new Set(
+    selectedMembers.map(Number)
+  )].filter(id => getPerson(id));
+
+  if (members.length < 2) {
+    alert("Bitte wähle mindestens zwei Personen aus.");
+    return;
+  }
+
+  const label =
+    $("relationName").value.trim() || "Verbunden mit";
+
+  let relation = relations.find(
+    r => r.id === selectedRelation
   );
 
+  if (relation) {
+    relation.members = members;
+    relation.label = label;
+  } else {
+    relation = {
+      id: nextId++,
+      members,
+      label
+    };
+
+    relations.push(relation);
+  }
+
+  selectedRelation = relation.id;
   selected = null;
-  selectedRelation = null;
+  selectedMembers = [...members];
 
   render();
   syncPanel();
   persist();
 };
 
+/* PERSON LÖSCHEN */
+
+$("deletePersonBtn").onclick = () => {
+  if (selected === null) return;
+  if (!confirm("Diese Person wirklich löschen?")) return;
+
+  const deletedId = selected;
+
+  people = people.filter(p => p.id !== deletedId);
+
+  relations = relations
+    .map(r => ({
+      ...r,
+      members: r.members.filter(id => id !== deletedId)
+    }))
+    .filter(r => r.members.length >= 2);
+
+  selected = null;
+  selectedRelation = null;
+  selectedMembers = [];
+
+  render();
+  syncPanel();
+  persist();
+};
+
+/* BEZIEHUNG LÖSCHEN */
+
 $("deleteRelationBtn").onclick = () => {
   if (selectedRelation === null) return;
 
   relations = relations.filter(r => r.id !== selectedRelation);
+
   selectedRelation = null;
+  selectedMembers = [];
 
   render();
   syncPanel();
@@ -830,6 +1169,7 @@ $("deleteRelationBtn").onclick = () => {
 function selectPerson(id) {
   selected = id;
   selectedRelation = null;
+  selectedMembers = [id];
   syncPanel();
   render();
 }
@@ -899,15 +1239,15 @@ function finishRelation(e) {
 
     if (label !== null) {
       const r = {
-        id: Date.now(),
-        from,
-        to,
+        id: nextId++,
+        members: [from, to],
         label: label.trim() || "Verbunden mit"
       };
 
       relations.push(r);
       selected = null;
       selectedRelation = r.id;
+      selectedMembers = [...r.members];
 
       syncPanel();
       persist();
@@ -922,6 +1262,7 @@ function finishRelation(e) {
 }
 
 // START: FINGER, MAUS UND APPLE PENCIL
+
 canvas.addEventListener("pointerdown", e => {
   const card = e.target.closest(".person");
 
@@ -999,6 +1340,7 @@ canvas.addEventListener("pointerdown", e => {
 }, {passive: false});
 
 // BEWEGUNG
+
 canvas.addEventListener("pointermove", e => {
 
   // APPLE PENCIL: Vorschau der Beziehung
@@ -1132,6 +1474,7 @@ canvas.addEventListener("pointermove", e => {
 });
 
 // ENDE EINER BERÜHRUNG
+
 function finishPointer(e) {
   if (relationDrag && e.pointerType === "pen") {
     finishRelation(e);
@@ -1174,6 +1517,7 @@ canvas.addEventListener("pointercancel", e => {
 });
 
 // LEERE FLÄCHE ANTIPPen
+
 canvas.addEventListener("click", e => {
   if (suppressClick) {
     suppressClick = false;
@@ -1188,12 +1532,14 @@ canvas.addEventListener("click", e => {
   ) {
     selected = null;
     selectedRelation = null;
+    selectedMembers = [];
     syncPanel();
     render();
   }
 });
 
 // ZOOM
+
 function applyTransform() {
   world.style.transform =
     `translate(${offset.x}px,${offset.y}px) scale(${scale})`;
@@ -1222,6 +1568,7 @@ $("zoomIn").onclick = () => zoomAtCenter(0.15);
 $("zoomOut").onclick = () => zoomAtCenter(-0.15);
 
 // STAMMBAUM EINPASSEN
+
 function fit() {
   if (!people.length) return;
 
@@ -1259,6 +1606,7 @@ $("resetBtn").onclick = () => {
 };
 
 // EXPORT
+
 $("saveBtn").onclick = () => {
   const blob = new Blob(
     [JSON.stringify({people, relations, nextId}, null, 2)],
@@ -1276,6 +1624,7 @@ $("saveBtn").onclick = () => {
 };
 
 // IMPORT
+
 $("loadBtn").onclick = () => $("fileInput").click();
 
 $("fileInput").onchange = e => {
@@ -1301,15 +1650,18 @@ $("fileInput").onchange = e => {
         ...p
       }));
 
-      relations = data.relations;
+      relations = data.relations
+        .map(normalizeRelation)
+        .filter(r => r.members.length >= 2);
 
       nextId = Math.max(
-        0,
+        Number(data.nextId) || 0,
         ...people.map(p => Number(p.id) || 0)
       ) + 1;
 
       selected = null;
       selectedRelation = null;
+      selectedMembers = [];
 
       render();
       syncPanel();
@@ -1329,9 +1681,12 @@ $("fileInput").onchange = e => {
 $("addBtn").onclick = addPerson;
 
 // GESPEICHERTE DATEN LADEN
+
 function loadSaved() {
   try {
-    const raw = localStorage.getItem("familienatlas-v2");
+    const raw =
+      localStorage.getItem("familienatlas-v3") ||
+      localStorage.getItem("familienatlas-v2");
 
     if (!raw) {
       example();
@@ -1353,10 +1708,18 @@ function loadSaved() {
 
     relations = Array.isArray(data.relations)
       ? data.relations
+          .map(normalizeRelation)
+          .filter(r => r.members.length >= 2)
       : [];
 
-    nextId = data.nextId ||
-      Math.max(0, ...people.map(p => p.id)) + 1;
+    nextId = Math.max(
+      Number(data.nextId) || 0,
+      ...people.map(p => Number(p.id) || 0)
+    ) + 1;
+
+    selected = null;
+    selectedRelation = null;
+    selectedMembers = [];
 
     render();
     syncPanel();
