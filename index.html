@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -295,7 +294,7 @@ header {
   stroke-width:2;
 }
 
-/* Seitenleiste: schwebend, abgerundet und leicht transparent */
+/* Schwebende Seitenleiste */
 
 .sidebar {
   position:relative;
@@ -306,23 +305,13 @@ header {
   flex-direction:column;
   gap:18px;
   overflow-y:auto;
-
   background:rgba(255,255,255,.76);
   border:1px solid rgba(255,255,255,.82);
   border-radius:22px;
-
-  box-shadow:
-    0 10px 35px rgba(0,0,0,.075),
-    0 2px 8px rgba(0,0,0,.025);
-
+  box-shadow:0 10px 35px rgba(0,0,0,.075),0 2px 8px rgba(0,0,0,.025);
   backdrop-filter:blur(24px) saturate(155%);
   -webkit-backdrop-filter:blur(24px) saturate(155%);
-
   min-height:0;
-  transition:
-    background .2s ease,
-    box-shadow .2s ease,
-    border-radius .2s ease;
 }
 
 .panel-title {
@@ -588,6 +577,129 @@ hr {
   margin-bottom:7px;
 }
 
+/* Export-Menü */
+
+.export-overlay {
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(25,30,27,.32);
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+
+.export-overlay.open {
+  display:flex;
+  animation:overlayIn .18s ease;
+}
+
+@keyframes overlayIn {
+  from {opacity:0}
+  to {opacity:1}
+}
+
+.export-dialog {
+  width:min(420px,100%);
+  padding:28px;
+  border-radius:24px;
+  background:rgba(255,255,255,.94);
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 24px 80px rgba(0,0,0,.2);
+  backdrop-filter:blur(25px);
+  -webkit-backdrop-filter:blur(25px);
+  animation:dialogIn .2s ease;
+}
+
+@keyframes dialogIn {
+  from {opacity:0;transform:translateY(10px) scale(.98)}
+  to {opacity:1;transform:translateY(0) scale(1)}
+}
+
+.export-dialog h2 {
+  margin:0 0 7px;
+  font-size:23px;
+  letter-spacing:-.6px;
+}
+
+.export-description {
+  color:#85858c;
+  font-size:13px;
+  line-height:1.55;
+  margin:0 0 22px;
+}
+
+.export-options {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.export-option {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:100%;
+  padding:14px;
+  border:1px solid rgba(220,220,225,.85);
+  border-radius:15px;
+  background:rgba(255,255,255,.8);
+  text-align:left;
+}
+
+.export-option:hover {
+  background:#f3f7f4;
+  border-color:#a9c6b2;
+}
+
+.export-icon {
+  width:44px;
+  height:44px;
+  flex-shrink:0;
+  display:grid;
+  place-items:center;
+  border-radius:13px;
+  font-size:21px;
+  font-weight:700;
+}
+
+.export-icon.pdf {background:#f9eaea;color:#bd5555}
+.export-icon.jpg {background:#eaf1f8;color:#557da7}
+.export-icon.json {background:#eaf3ed;color:#34765a}
+
+.export-option strong {
+  display:block;
+  font-size:14px;
+  margin-bottom:3px;
+}
+
+.export-option small {
+  display:block;
+  font-size:11px;
+  color:#85858c;
+  font-weight:400;
+}
+
+.export-close {
+  width:100%;
+  margin-top:17px;
+  padding:11px;
+  background:rgba(245,245,247,.9);
+}
+
+.export-loading {
+  display:none;
+  font-size:12px;
+  color:#6d786f;
+  text-align:center;
+  margin:15px 0 0;
+}
+
+.export-loading.visible {display:block}
+
 /* Scrollbars */
 
 .sidebar::-webkit-scrollbar,
@@ -644,11 +756,17 @@ hr {
     width:calc(100vw - 24px);
     max-width:350px;
   }
+
+  .export-dialog {
+    padding:23px;
+    border-radius:21px;
+  }
 }
 </style>
 </head>
 
 <body>
+
 <header>
   <div class="brand">
     <div class="brand-icon">⌘</div>
@@ -657,6 +775,7 @@ hr {
       <small>Dein Stammbaum, frei gestaltet</small>
     </div>
   </div>
+
   <div class="actions">
     <button class="primary" id="addBtn">＋ Person</button>
     <button id="saveBtn">↓ Exportieren</button>
@@ -667,6 +786,7 @@ hr {
 
 <div class="workspace" id="workspace">
   <main class="canvas" id="canvas">
+
     <div class="canvas-tools">
       <button id="fitBtn">⌖ Ansicht</button>
       <button id="resetBtn">↺ Beispiel</button>
@@ -778,6 +898,51 @@ hr {
   </aside>
 </div>
 
+<!-- Zentrales Export-Menü -->
+
+<div class="export-overlay" id="exportOverlay">
+  <div class="export-dialog" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+    <h2 id="exportTitle">Stammbaum exportieren</h2>
+    <p class="export-description">
+      In welchem Dateiformat möchtest du deinen Stammbaum speichern?
+    </p>
+
+    <div class="export-options">
+      <button class="export-option" id="exportPdfBtn">
+        <span class="export-icon pdf">PDF</span>
+        <span>
+          <strong>Als PDF exportieren</strong>
+          <small>Zum Drucken oder Teilen</small>
+        </span>
+      </button>
+
+      <button class="export-option" id="exportJpgBtn">
+        <span class="export-icon jpg">JPG</span>
+        <span>
+          <strong>Als JPG exportieren</strong>
+          <small>Als Bild speichern</small>
+        </span>
+      </button>
+
+      <button class="export-option" id="exportJsonBtn">
+        <span class="export-icon json">{ }</span>
+        <span>
+          <strong>Als JSON exportieren</strong>
+          <small>Zum späteren Importieren und Bearbeiten</small>
+        </span>
+      </button>
+    </div>
+
+    <p class="export-loading" id="exportLoading">Export wird vorbereitet …</p>
+    <button class="export-close" id="closeExportBtn">Abbrechen</button>
+  </div>
+</div>
+
+<!-- Bibliotheken für Bild- und PDF-Export -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
 (() => {
 "use strict";
@@ -811,9 +976,7 @@ let touchPoints = new Map();
 let pinch = null;
 let suppressClick = false;
 
-const colors = [
-  "white","sage","blue","rose","sand","lavender"
-];
+const colors = ["white","sage","blue","rose","sand","lavender"];
 
 const examplePeople = [
   {id:1,name:"Mutter",birth:"1960",death:"",tone:"sage",x:370,y:120,w:190,h:112},
@@ -827,9 +990,7 @@ function getPerson(id) {
 }
 
 function normalizeRelation(r) {
-  let members = Array.isArray(r.members)
-    ? r.members
-    : [r.from,r.to];
+  let members = Array.isArray(r.members) ? r.members : [r.from,r.to];
 
   members = [...new Set(
     members.map(Number).filter(id => people.some(p => p.id === id))
@@ -906,7 +1067,7 @@ function getBox(p) {
   };
 }
 
-function getAnchor(p, point) {
+function getAnchor(p,point) {
   const b = getBox(p);
   const dx = point.x-b.cx;
   const dy = point.y-b.cy;
@@ -982,10 +1143,7 @@ function drawLinks() {
   links.innerHTML = "";
 
   relations.forEach(r => {
-    const members = (r.members || [])
-      .map(getPerson)
-      .filter(Boolean);
-
+    const members = (r.members || []).map(getPerson).filter(Boolean);
     if (members.length < 2) return;
 
     const point = getRelationPoint(r);
@@ -996,10 +1154,7 @@ function drawLinks() {
       const dx = point.x-anchor.x;
       const dy = point.y-anchor.y;
 
-      const bend = Math.min(
-        75,
-        Math.max(25,Math.hypot(dx,dy)*0.35)
-      );
+      const bend = Math.min(75,Math.max(25,Math.hypot(dx,dy)*0.35));
 
       let c1x = anchor.x;
       let c1y = anchor.y;
@@ -1014,9 +1169,7 @@ function drawLinks() {
         c2y -= Math.sign(dy)*bend;
       }
 
-      const path = document.createElementNS(
-        "http://www.w3.org/2000/svg","path"
-      );
+      const path = document.createElementNS("http://www.w3.org/2000/svg","path");
 
       path.setAttribute(
         "d",
@@ -1031,9 +1184,7 @@ function drawLinks() {
       links.appendChild(path);
     });
 
-    const hub = document.createElementNS(
-      "http://www.w3.org/2000/svg","circle"
-    );
+    const hub = document.createElementNS("http://www.w3.org/2000/svg","circle");
 
     hub.setAttribute("cx",point.x);
     hub.setAttribute("cy",point.y);
@@ -1041,9 +1192,7 @@ function drawLinks() {
     hub.setAttribute("fill",color);
     hub.setAttribute("class","relation-hub");
 
-    if (selectedRelation === r.id) {
-      hub.classList.add("selected");
-    }
+    if (selectedRelation === r.id) hub.classList.add("selected");
 
     hub.dataset.relationId = r.id;
 
@@ -1051,9 +1200,7 @@ function drawLinks() {
       e.stopPropagation();
       e.preventDefault();
 
-      try {
-        canvas.setPointerCapture(e.pointerId);
-      } catch(err) {}
+      try {canvas.setPointerCapture(e.pointerId)} catch(err) {}
 
       hubDrag = {
         id:r.id,
@@ -1073,19 +1220,14 @@ function drawLinks() {
 
     links.appendChild(hub);
 
-    const ring = document.createElementNS(
-      "http://www.w3.org/2000/svg","circle"
-    );
+    const ring = document.createElementNS("http://www.w3.org/2000/svg","circle");
     ring.setAttribute("cx",point.x);
     ring.setAttribute("cy",point.y);
     ring.setAttribute("r","20");
     ring.setAttribute("class","relation-hub-ring");
     links.appendChild(ring);
 
-    const text = document.createElementNS(
-      "http://www.w3.org/2000/svg","text"
-    );
-
+    const text = document.createElementNS("http://www.w3.org/2000/svg","text");
     text.setAttribute("x",point.x);
     text.setAttribute("y",point.y-24);
     text.setAttribute("text-anchor","middle");
@@ -1119,9 +1261,7 @@ function renderMemberList() {
 
     checkbox.addEventListener("change",() => {
       if (checkbox.checked) {
-        if (!selectedMembers.includes(p.id)) {
-          selectedMembers.push(p.id);
-        }
+        if (!selectedMembers.includes(p.id)) selectedMembers.push(p.id);
       } else {
         selectedMembers = selectedMembers.filter(id => id !== p.id);
       }
@@ -1148,9 +1288,7 @@ function renderRelationList() {
     const button = document.createElement("button");
     button.className = "relation-item";
 
-    if (selectedRelation === r.id) {
-      button.classList.add("active");
-    }
+    if (selectedRelation === r.id) button.classList.add("active");
 
     const title = document.createElement("span");
     title.textContent = r.label || "Beziehung";
@@ -1163,21 +1301,14 @@ function renderRelationList() {
       .join(" · ");
 
     button.append(title,detail);
-
-    button.addEventListener("click",() => {
-      selectRelation(r.id);
-    });
-
+    button.addEventListener("click",() => selectRelation(r.id));
     list.appendChild(button);
   });
 }
 
 function syncColorButtons() {
   $("relationColors").querySelectorAll("[data-color]").forEach(b => {
-    b.setAttribute(
-      "aria-pressed",
-      String(b.dataset.color === selectedRelationColor)
-    );
+    b.setAttribute("aria-pressed",String(b.dataset.color === selectedRelationColor));
   });
 }
 
@@ -1191,9 +1322,7 @@ function syncPanel() {
   $("personEditor").style.flexDirection = "column";
   $("personEditor").style.gap = "17px";
 
-  $("personPanelTitle").textContent = hasPerson
-    ? "Person bearbeiten"
-    : "Personen";
+  $("personPanelTitle").textContent = hasPerson ? "Person bearbeiten" : "Personen";
 
   $("personPanelHint").textContent = hasPerson
     ? "Hier kannst du die ausgewählte Person bearbeiten."
@@ -1206,17 +1335,12 @@ function syncPanel() {
   $("death").value = p?.death || "";
 
   $("colors").querySelectorAll("button").forEach(b => {
-    b.setAttribute(
-      "aria-pressed",
-      String(b.dataset.tone === p?.tone)
-    );
+    b.setAttribute("aria-pressed",String(b.dataset.tone === p?.tone));
   });
 
   const r = relations.find(x => x.id === selectedRelation);
 
-  $("relationPanelTitle").textContent = hasRelation
-    ? "Beziehung bearbeiten"
-    : "Beziehungen";
+  $("relationPanelTitle").textContent = hasRelation ? "Beziehung bearbeiten" : "Beziehungen";
 
   $("relationPanelHint").textContent = hasRelation
     ? "Ändere die Beteiligten, die Farbe oder die Position des Verbindungspunktes."
@@ -1249,13 +1373,8 @@ function selectRelation(id) {
 
 function persist() {
   try {
-    localStorage.setItem(
-      "familienatlas-v3",
-      JSON.stringify({people,relations,nextId})
-    );
-
-    $("status").textContent =
-      "Gespeichert · "+new Date().toLocaleTimeString("de-DE");
+    localStorage.setItem("familienatlas-v3",JSON.stringify({people,relations,nextId}));
+    $("status").textContent = "Gespeichert · "+new Date().toLocaleTimeString("de-DE");
   } catch(e) {
     $("status").textContent = "Speichern nicht möglich.";
   }
@@ -1295,17 +1414,9 @@ function updatePerson(key,value) {
   persist();
 }
 
-$("fullName").addEventListener("input",e =>
-  updatePerson("name",e.target.value)
-);
-
-$("birth").addEventListener("change",e =>
-  updatePerson("birth",e.target.value)
-);
-
-$("death").addEventListener("change",e =>
-  updatePerson("death",e.target.value)
-);
+$("fullName").addEventListener("input",e => updatePerson("name",e.target.value));
+$("birth").addEventListener("change",e => updatePerson("birth",e.target.value));
+$("death").addEventListener("change",e => updatePerson("death",e.target.value));
 
 $("colors").addEventListener("click",e => {
   const b = e.target.closest("[data-tone]");
@@ -1339,9 +1450,8 @@ $("relationColors").addEventListener("click",e => {
 });
 
 $("createRelationBtn").onclick = () => {
-  const members = [...new Set(
-    selectedMembers.map(Number)
-  )].filter(id => getPerson(id));
+  const members = [...new Set(selectedMembers.map(Number))]
+    .filter(id => getPerson(id));
 
   if (members.length < 2) {
     alert("Bitte wähle mindestens zwei Personen aus.");
@@ -1349,7 +1459,6 @@ $("createRelationBtn").onclick = () => {
   }
 
   const label = $("relationName").value.trim() || "Verbunden mit";
-
   let r = relations.find(x => x.id === selectedRelation);
 
   if (r) {
@@ -1382,14 +1491,10 @@ $("deletePersonBtn").onclick = () => {
   if (!confirm("Diese Person wirklich löschen?")) return;
 
   const deletedId = selected;
-
   people = people.filter(p => p.id !== deletedId);
 
   relations = relations
-    .map(r => ({
-      ...r,
-      members:r.members.filter(id => id !== deletedId)
-    }))
+    .map(r => ({...r,members:r.members.filter(id => id !== deletedId)}))
     .filter(r => r.members.length >= 2);
 
   selected = null;
@@ -1424,9 +1529,7 @@ function selectPerson(id) {
 }
 
 function capturePointer(e) {
-  try {
-    canvas.setPointerCapture(e.pointerId);
-  } catch(err) {}
+  try {canvas.setPointerCapture(e.pointerId)} catch(err) {}
 }
 
 function startMove(id,e) {
@@ -1476,11 +1579,7 @@ function finishRelation(e) {
 
   if (target && Number(target.dataset.id) !== from) {
     const to = Number(target.dataset.id);
-
-    const label = prompt(
-      "Wie soll diese Beziehung heißen?",
-      "Verwandt mit"
-    );
+    const label = prompt("Wie soll diese Beziehung heißen?","Verwandt mit");
 
     if (label !== null) {
       const r = {
@@ -1491,10 +1590,7 @@ function finishRelation(e) {
         point:null
       };
 
-      r.point = defaultRelationPoint(
-        r.members.map(getPerson)
-      );
-
+      r.point = defaultRelationPoint(r.members.map(getPerson));
       relations.push(r);
       selected = null;
       selectedRelation = r.id;
@@ -1507,10 +1603,7 @@ function finishRelation(e) {
   }
 
   render();
-
-  setTimeout(() => {
-    suppressClick = false;
-  },150);
+  setTimeout(() => {suppressClick = false},150);
 }
 
 function moveHubToPointer(e) {
@@ -1544,7 +1637,6 @@ canvas.addEventListener("pointerdown",e => {
   if (e.pointerType === "touch") {
     e.preventDefault();
     capturePointer(e);
-
     touchPoints.set(e.pointerId,{x:e.clientX,y:e.clientY});
 
     if (touchPoints.size === 2) {
@@ -1576,11 +1668,8 @@ canvas.addEventListener("pointerdown",e => {
     if (touchPoints.size === 1 && card) {
       const id = Number(card.dataset.id);
 
-      if (e.target.closest(".resize-handle")) {
-        startResize(id,e);
-      } else {
-        startMove(id,e);
-      }
+      if (e.target.closest(".resize-handle")) startResize(id,e);
+      else startMove(id,e);
     }
 
     return;
@@ -1588,23 +1677,16 @@ canvas.addEventListener("pointerdown",e => {
 
   if (e.pointerType === "mouse" && card) {
     capturePointer(e);
-
     const id = Number(card.dataset.id);
 
-    if (e.target.closest(".resize-handle")) {
-      startResize(id,e);
-    } else {
-      startMove(id,e);
-    }
+    if (e.target.closest(".resize-handle")) startResize(id,e);
+    else startMove(id,e);
   }
 },{passive:false});
 
 canvas.addEventListener("pointermove",e => {
   if (hubDrag && hubDrag.pointerId === e.pointerId) {
-    if (Math.hypot(
-      e.clientX-hubDrag.startX,
-      e.clientY-hubDrag.startY
-    ) > 3) {
+    if (Math.hypot(e.clientX-hubDrag.startX,e.clientY-hubDrag.startY) > 3) {
       moveHubToPointer(e);
     }
     return;
@@ -1615,7 +1697,6 @@ canvas.addEventListener("pointermove",e => {
     if (!a) return;
 
     const rect = world.getBoundingClientRect();
-
     const x1 = a.x+(a.w || 190)/2;
     const y1 = a.y+(a.h || 112)/2;
     const x2 = (e.clientX-rect.left)/scale;
@@ -1623,16 +1704,12 @@ canvas.addEventListener("pointermove",e => {
 
     drawLinks();
 
-    const line = document.createElementNS(
-      "http://www.w3.org/2000/svg","path"
-    );
-
+    const line = document.createElementNS("http://www.w3.org/2000/svg","path");
     line.setAttribute("d",`M ${x1} ${y1} L ${x2} ${y2}`);
     line.setAttribute("stroke","#b17a39");
     line.setAttribute("stroke-width","3");
     line.setAttribute("stroke-dasharray","7 5");
     line.setAttribute("fill","none");
-
     links.appendChild(line);
     return;
   }
@@ -1644,7 +1721,6 @@ canvas.addEventListener("pointermove",e => {
 
     if (touchPoints.size === 2 && pinch) {
       const pts = [...touchPoints.values()];
-
       const center = {
         x:(pts[0].x+pts[1].x)/2,
         y:(pts[0].y+pts[1].y)/2
@@ -1656,7 +1732,6 @@ canvas.addEventListener("pointermove",e => {
       );
 
       const factor = distance/pinch.distance;
-
       scale = Math.max(0.25,Math.min(2.5,pinch.scale*factor));
       offset.x = center.x-pinch.worldX*scale;
       offset.y = center.y-pinch.worldY*scale;
@@ -1698,15 +1773,8 @@ canvas.addEventListener("pointermove",e => {
     const p = getPerson(drag.id);
     if (!p) return;
 
-    p.x = Math.max(
-      0,
-      drag.origX+(e.clientX-drag.startX)/scale
-    );
-
-    p.y = Math.max(
-      0,
-      drag.origY+(e.clientY-drag.startY)/scale
-    );
+    p.x = Math.max(0,drag.origX+(e.clientX-drag.startX)/scale);
+    p.y = Math.max(0,drag.origY+(e.clientY-drag.startY)/scale);
 
     const el = nodes.querySelector(`[data-id="${p.id}"]`);
 
@@ -1743,7 +1811,6 @@ function finishPointer(e) {
 
   if (e.pointerType === "touch") {
     touchPoints.delete(e.pointerId);
-
     drag = null;
     resizeDrag = null;
     pinch = null;
@@ -1767,13 +1834,11 @@ canvas.addEventListener("pointerup",finishPointer);
 
 canvas.addEventListener("pointercancel",e => {
   touchPoints.delete(e.pointerId);
-
   drag = null;
   resizeDrag = null;
   relationDrag = null;
   hubDrag = null;
   pinch = null;
-
   drawLinks();
 });
 
@@ -1799,9 +1864,7 @@ canvas.addEventListener("click",e => {
 });
 
 function applyTransform() {
-  world.style.transform =
-    `translate(${offset.x}px,${offset.y}px) scale(${scale})`;
-
+  world.style.transform = `translate(${offset.x}px,${offset.y}px) scale(${scale})`;
   $("zoomLabel").textContent = Math.round(scale*100)+"%";
 }
 
@@ -1809,12 +1872,10 @@ function zoomAtCenter(change) {
   const rect = canvas.getBoundingClientRect();
   const cx = rect.width/2;
   const cy = rect.height/2;
-
   const wx = (cx-offset.x)/scale;
   const wy = (cy-offset.y)/scale;
 
   scale = Math.max(0.25,Math.min(2.5,scale+change));
-
   offset.x = cx-wx*scale;
   offset.y = cy-wy*scale;
 
@@ -1829,7 +1890,6 @@ function fit() {
 
   const minX = Math.min(...people.map(p=>p.x));
   const minY = Math.min(...people.map(p=>p.y));
-
   const maxX = Math.max(...people.map(p=>p.x+(p.w || 190)));
   const maxY = Math.max(...people.map(p=>p.y+(p.h || 112)));
 
@@ -1843,11 +1903,8 @@ function fit() {
 
   scale = Math.max(0.25,scale);
 
-  offset.x =
-    (rect.width-(maxX-minX)*scale)/2-minX*scale;
-
-  offset.y =
-    (rect.height-(maxY-minY)*scale)/2-minY*scale;
+  offset.x = (rect.width-(maxX-minX)*scale)/2-minX*scale;
+  offset.y = (rect.height-(maxY-minY)*scale)/2-minY*scale;
 
   applyTransform();
 }
@@ -1855,26 +1912,314 @@ function fit() {
 $("fitBtn").onclick = fit;
 
 $("resetBtn").onclick = () => {
-  if (confirm("Beispiel-Stammbaum wiederherstellen?")) {
-    example();
-  }
+  if (confirm("Beispiel-Stammbaum wiederherstellen?")) example();
 };
 
-$("saveBtn").onclick = () => {
+/* ---------------------------------------
+   EXPORT-MENÜ
+--------------------------------------- */
+
+function openExportMenu() {
+  $("exportOverlay").classList.add("open");
+  $("exportLoading").classList.remove("visible");
+}
+
+function closeExportMenu() {
+  $("exportOverlay").classList.remove("open");
+  $("exportLoading").classList.remove("visible");
+}
+
+$("saveBtn").onclick = openExportMenu;
+$("closeExportBtn").onclick = closeExportMenu;
+
+$("exportOverlay").addEventListener("click",e => {
+  if (e.target === $("exportOverlay")) closeExportMenu();
+});
+
+document.addEventListener("keydown",e => {
+  if (e.key === "Escape") closeExportMenu();
+});
+
+function showExportLoading(message) {
+  $("exportLoading").textContent = message || "Export wird vorbereitet …";
+  $("exportLoading").classList.add("visible");
+}
+
+/* JSON-Export */
+
+function exportJSON() {
   const blob = new Blob(
     [JSON.stringify({people,relations,nextId},null,2)],
     {type:"application/json"}
   );
 
+  downloadBlob(blob,"mein-stammbaum.json");
+  closeExportMenu();
+}
+
+/* Hilfsfunktion zum Herunterladen */
+
+function downloadBlob(blob,filename) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
 
   a.href = url;
-  a.download = "mein-stammbaum.json";
+  a.download = filename;
+  document.body.appendChild(a);
   a.click();
+  a.remove();
 
-  URL.revokeObjectURL(url);
-};
+  setTimeout(() => URL.revokeObjectURL(url),1500);
+}
+
+/*
+  Erstellt eine saubere Exportkopie des Stammbaums.
+  Die aktuelle Bildschirmposition und der Zoom werden ignoriert.
+  Der Export wird auf die tatsächlich verwendeten Personen zugeschnitten.
+*/
+
+function createExportElement() {
+  if (!people.length) {
+    alert("Dein Stammbaum ist noch leer.");
+    return null;
+  }
+
+  const padding = 70;
+
+  let minX = Math.min(...people.map(p => p.x));
+  let minY = Math.min(...people.map(p => p.y));
+  let maxX = Math.max(...people.map(p => p.x+(p.w || 190)));
+  let maxY = Math.max(...people.map(p => p.y+(p.h || 112)));
+
+  relations.forEach(r => {
+    if ((r.members || []).length < 2) return;
+    const point = getRelationPoint(r);
+
+    minX = Math.min(minX,point.x-30);
+    minY = Math.min(minY,point.y-45);
+    maxX = Math.max(maxX,point.x+30);
+    maxY = Math.max(maxY,point.y+30);
+  });
+
+  minX = Math.max(0,minX-padding);
+  minY = Math.max(0,minY-padding);
+  maxX += padding;
+  maxY += padding;
+
+  const width = Math.max(300,maxX-minX);
+  const height = Math.max(220,maxY-minY);
+
+  const wrapper = document.createElement("div");
+
+  wrapper.style.cssText = `
+    position:fixed;
+    left:-20000px;
+    top:0;
+    width:${width}px;
+    height:${height}px;
+    overflow:hidden;
+    background:#f5f5f7;
+    z-index:-1;
+  `;
+
+  const exportWorld = document.createElement("div");
+
+  exportWorld.style.cssText = `
+    position:relative;
+    width:${width}px;
+    height:${height}px;
+    background-color:#f5f5f7;
+    background-image:radial-gradient(#d9d9df .8px,transparent .8px);
+    background-size:23px 23px;
+    overflow:hidden;
+  `;
+
+  const exportLinks = links.cloneNode(true);
+
+  exportLinks.removeAttribute("id");
+  exportLinks.style.cssText = `
+    position:absolute;
+    left:0;
+    top:0;
+    width:${width}px;
+    height:${height}px;
+    overflow:visible;
+    pointer-events:none;
+  `;
+
+  exportLinks.setAttribute("viewBox",`${minX} ${minY} ${width} ${height}`);
+  exportLinks.setAttribute("width",width);
+  exportLinks.setAttribute("height",height);
+
+  const exportNodes = nodes.cloneNode(true);
+  exportNodes.removeAttribute("id");
+
+  exportNodes.style.cssText = `
+    position:absolute;
+    left:${-minX}px;
+    top:${-minY}px;
+    width:4000px;
+    height:3000px;
+    pointer-events:none;
+  `;
+
+  exportNodes.querySelectorAll(".person").forEach(card => {
+    card.classList.remove("selected");
+    card.querySelector(".resize-handle")?.remove();
+    card.style.pointerEvents = "none";
+  });
+
+  exportWorld.append(exportLinks,exportNodes);
+  wrapper.appendChild(exportWorld);
+  document.body.appendChild(wrapper);
+
+  return {wrapper,exportWorld,width,height};
+}
+
+/* JPG-Export */
+
+async function exportJPG() {
+  if (!window.html2canvas) {
+    alert("Die Bildbibliothek konnte nicht geladen werden. Bitte prüfe deine Internetverbindung und lade die Seite erneut.");
+    return;
+  }
+
+  if (!people.length) {
+    alert("Dein Stammbaum ist noch leer.");
+    return;
+  }
+
+  showExportLoading("JPG-Bild wird erstellt …");
+
+  let exportData = null;
+
+  try {
+    exportData = createExportElement();
+    if (!exportData) return;
+
+    const imageCanvas = await html2canvas(exportData.exportWorld,{
+      backgroundColor:"#f5f5f7",
+      scale:2,
+      useCORS:true,
+      logging:false,
+      width:exportData.width,
+      height:exportData.height
+    });
+
+    imageCanvas.toBlob(blob => {
+      if (!blob) {
+        alert("Das JPG-Bild konnte leider nicht erstellt werden.");
+        return;
+      }
+
+      downloadBlob(blob,"mein-stammbaum.jpg");
+      closeExportMenu();
+      exportData.wrapper.remove();
+    },"image/jpeg",0.95);
+
+  } catch(error) {
+    console.error(error);
+    alert("Beim Erstellen des JPG-Bildes ist ein Fehler aufgetreten.");
+    closeExportMenu();
+  } finally {
+    if (exportData && exportData.wrapper.isConnected) {
+      setTimeout(() => exportData.wrapper.remove(),1000);
+    }
+  }
+}
+
+/* PDF-Export */
+
+async function exportPDF() {
+  if (!window.html2canvas || !window.jspdf) {
+    alert("Die PDF-Bibliotheken konnten nicht geladen werden. Bitte prüfe deine Internetverbindung und lade die Seite erneut.");
+    return;
+  }
+
+  if (!people.length) {
+    alert("Dein Stammbaum ist noch leer.");
+    return;
+  }
+
+  showExportLoading("PDF-Dokument wird erstellt …");
+
+  let exportData = null;
+
+  try {
+    exportData = createExportElement();
+    if (!exportData) return;
+
+    const imageCanvas = await html2canvas(exportData.exportWorld,{
+      backgroundColor:"#f5f5f7",
+      scale:2,
+      useCORS:true,
+      logging:false,
+      width:exportData.width,
+      height:exportData.height
+    });
+
+    const imageData = imageCanvas.toDataURL("image/jpeg",0.95);
+
+    const {jsPDF} = window.jspdf;
+
+    const landscape = exportData.width >= exportData.height;
+
+    const pdf = new jsPDF({
+      orientation:landscape ? "landscape" : "portrait",
+      unit:"mm",
+      format:"a4"
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const margin = 10;
+    const availableWidth = pageWidth-margin*2;
+    const availableHeight = pageHeight-margin*2;
+
+    const ratio = Math.min(
+      availableWidth/exportData.width,
+      availableHeight/exportData.height
+    );
+
+    const renderWidth = exportData.width*ratio;
+    const renderHeight = exportData.height*ratio;
+
+    const x = (pageWidth-renderWidth)/2;
+    const y = (pageHeight-renderHeight)/2;
+
+    pdf.addImage(
+      imageData,
+      "JPEG",
+      x,
+      y,
+      renderWidth,
+      renderHeight,
+      undefined,
+      "FAST"
+    );
+
+    pdf.save("mein-stammbaum.pdf");
+    closeExportMenu();
+
+  } catch(error) {
+    console.error(error);
+    alert("Beim Erstellen der PDF-Datei ist ein Fehler aufgetreten.");
+    closeExportMenu();
+  } finally {
+    if (exportData?.wrapper?.isConnected) {
+      exportData.wrapper.remove();
+    }
+  }
+}
+
+/* Export-Menü-Aktionen */
+
+$("exportJsonBtn").onclick = exportJSON;
+$("exportJpgBtn").onclick = exportJPG;
+$("exportPdfBtn").onclick = exportPDF;
+
+/* Import */
 
 $("loadBtn").onclick = () => $("fileInput").click();
 
@@ -1888,16 +2233,11 @@ $("fileInput").onchange = e => {
     try {
       const data = JSON.parse(reader.result);
 
-      if (
-        !Array.isArray(data.people) ||
-        !Array.isArray(data.relations)
-      ) {
+      if (!Array.isArray(data.people) || !Array.isArray(data.relations)) {
         throw new Error("Ungültige Datei");
       }
 
-      people = data.people.map(p => ({
-        w:190,h:112,...p
-      }));
+      people = data.people.map(p => ({w:190,h:112,...p}));
 
       nextId = Math.max(
         Number(data.nextId) || 0,
@@ -1947,9 +2287,7 @@ function loadSaved() {
       return;
     }
 
-    people = data.people.map(p => ({
-      w:190,h:112,...p
-    }));
+    people = data.people.map(p => ({w:190,h:112,...p}));
 
     nextId = Math.max(
       Number(data.nextId) || 0,
@@ -1957,9 +2295,7 @@ function loadSaved() {
     )+1;
 
     relations = Array.isArray(data.relations)
-      ? data.relations
-          .map(normalizeRelation)
-          .filter(r=>r.members.length>=2)
+      ? data.relations.map(normalizeRelation).filter(r=>r.members.length>=2)
       : [];
 
     selected = null;
