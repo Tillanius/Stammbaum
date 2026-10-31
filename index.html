@@ -9,468 +9,283 @@
 
 <style>
 :root {
-  --green: #355c50;
-  --background: #f5f6f2;
-  --border: #dce3dc;
-  --text: #26342e;
+  --green:#355c50;
+  --background:#f5f6f2;
+  --border:#dce3dc;
+  --text:#26342e;
 }
 
-* { box-sizing: border-box; }
-
+* {box-sizing:border-box}
 body {
-  margin: 0;
-  font-family: Inter, system-ui, sans-serif;
-  color: var(--text);
-  background: var(--background);
-  overflow: hidden;
+  margin:0;
+  font-family:Inter,system-ui,sans-serif;
+  color:var(--text);
+  background:var(--background);
+  overflow:hidden;
 }
-
-button, input { font: inherit; }
-
+button,input {font:inherit}
 button {
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: white;
-  color: #304139;
-  border-radius: 9px;
-  padding: 9px 13px;
-  font-size: 13px;
-  font-weight: 600;
+  cursor:pointer;
+  border:1px solid var(--border);
+  background:white;
+  color:#304139;
+  border-radius:9px;
+  padding:9px 13px;
+  font-size:13px;
+  font-weight:600;
 }
-
-button:hover { background: #f0f4ef; }
-
+button:hover {background:#f0f4ef}
 button.primary {
-  background: var(--green);
-  color: white;
-  border-color: var(--green);
+  background:var(--green);
+  color:white;
+  border-color:var(--green);
 }
 
 header {
-  min-height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 20px;
-  background: white;
-  border-bottom: 1px solid var(--border);
-  gap: 12px;
-  position: relative;
-  z-index: 10;
+  min-height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 20px;
+  background:white;
+  border-bottom:1px solid var(--border);
+  gap:12px;
+  position:relative;
+  z-index:10;
 }
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-}
-
+.brand {display:flex;align-items:center;gap:11px}
 .brand-icon {
-  width: 40px;
-  height: 40px;
-  background: var(--green);
-  color: white;
-  border-radius: 11px;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
+  width:40px;height:40px;
+  background:var(--green);
+  color:white;border-radius:11px;
+  display:grid;place-items:center;font-size:22px;
 }
-
-.brand strong {
-  font-family: Georgia, serif;
-  font-size: 22px;
-}
-
+.brand strong {font-family:Georgia,serif;font-size:22px}
 .brand small {
-  display: block;
-  font-size: 10px;
-  letter-spacing: .12em;
-  color: #77847b;
-  text-transform: uppercase;
+  display:block;font-size:10px;
+  letter-spacing:.12em;color:#77847b;
+  text-transform:uppercase;
 }
-
-.actions {
-  display: flex;
-  gap: 7px;
-  flex-wrap: wrap;
-}
+.actions {display:flex;gap:7px;flex-wrap:wrap}
 
 .workspace {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  height: calc(100dvh - 70px);
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 320px;
+  height:calc(100dvh - 70px);
 }
+.workspace:not(.has-selection) {grid-template-columns:1fr}
+.workspace:not(.has-selection) .sidebar {display:none}
 
-.workspace:not(.has-selection) {
-  grid-template-columns: 1fr;
-}
-
-.workspace:not(.has-selection) .sidebar {
-  display: none;
-}
-
-/* ZEICHENFLÄCHE */
+/* Zeichenfläche */
 
 .canvas {
-  position: relative;
-  overflow: hidden;
-  min-width: 0;
-  background-color: #f8f9f6;
-  background-image: radial-gradient(#d8ded7 .8px, transparent .8px);
-  background-size: 22px 22px;
-  touch-action: none;
-  overscroll-behavior: none;
-  user-select: none;
-  -webkit-user-select: none;
+  position:relative;overflow:hidden;min-width:0;
+  background-color:#f8f9f6;
+  background-image:radial-gradient(#d8ded7 .8px,transparent .8px);
+  background-size:22px 22px;
+  touch-action:none;overscroll-behavior:none;
+  user-select:none;-webkit-user-select:none;
 }
-
 .world {
-  position: absolute;
-  width: 4000px;
-  height: 3000px;
-  left: 0;
-  top: 0;
-  transform-origin: 0 0;
+  position:absolute;width:4000px;height:3000px;
+  left:0;top:0;transform-origin:0 0;
 }
-
 #links {
-  position: absolute;
-  width: 4000px;
-  height: 3000px;
-  overflow: visible;
-  pointer-events: none;
+  position:absolute;width:4000px;height:3000px;
+  overflow:visible;pointer-events:none;
 }
+#nodes {position:absolute;inset:0}
 
-#nodes {
-  position: absolute;
-  inset: 0;
-}
-
-/* PERSONENKÄSTEN */
+/* Personen */
 
 .person {
-  position: absolute;
-  width: 190px;
-  height: 112px;
-  min-width: 150px;
-  min-height: 100px;
-  padding: 15px;
-  border: 1.5px solid #cbd4cc;
-  border-radius: 13px;
-  box-shadow: 0 5px 18px #25382b12;
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  overflow: visible;
+  position:absolute;width:190px;height:112px;
+  min-width:150px;min-height:100px;padding:15px;
+  border:1.5px solid #cbd4cc;border-radius:13px;
+  box-shadow:0 5px 18px #25382b12;
+  cursor:grab;touch-action:none;
+  user-select:none;-webkit-user-select:none;
+  overflow:visible;
 }
-
 .person.selected {
-  outline: 2px solid var(--green);
-  outline-offset: 3px;
+  outline:2px solid var(--green);
+  outline-offset:3px;
 }
-
 .person .name {
-  font-family: Georgia, serif;
-  font-size: 19px;
-  font-weight: 600;
-  color: #263b32;
-  margin-bottom: 9px;
-  overflow-wrap: anywhere;
+  font-family:Georgia,serif;font-size:19px;
+  font-weight:600;color:#263b32;
+  margin-bottom:9px;overflow-wrap:anywhere;
 }
-
 .person .dates {
-  font-size: 12px;
-  color: #647168;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
+  font-size:12px;color:#647168;
+  line-height:1.6;overflow-wrap:anywhere;
 }
-
 .person .dot {
-  width: 8px;
-  height: 8px;
-  display: inline-block;
-  border-radius: 50%;
-  margin-right: 6px;
+  width:8px;height:8px;display:inline-block;
+  border-radius:50%;margin-right:6px;
 }
-
-.person[data-tone="white"] { background: white; }
-.person[data-tone="sage"] { background: #e8f0e8; }
-.person[data-tone="blue"] { background: #e8eef5; }
-.person[data-tone="rose"] { background: #f5e9e7; }
-.person[data-tone="sand"] { background: #f4efdf; }
-.person[data-tone="lavender"] { background: #efebf6; }
-
-.person[data-tone="white"] .dot { background: #9ba79e; }
-.person[data-tone="sage"] .dot { background: #668b70; }
-.person[data-tone="blue"] .dot { background: #6d8eae; }
-.person[data-tone="rose"] .dot { background: #b77c78; }
-.person[data-tone="sand"] .dot { background: #b39a57; }
-.person[data-tone="lavender"] .dot { background: #8c7cab; }
-
-/* GRÖSSENÄNDERUNG */
+.person[data-tone="white"] {background:white}
+.person[data-tone="sage"] {background:#e8f0e8}
+.person[data-tone="blue"] {background:#e8eef5}
+.person[data-tone="rose"] {background:#f5e9e7}
+.person[data-tone="sand"] {background:#f4efdf}
+.person[data-tone="lavender"] {background:#efebf6}
+.person[data-tone="white"] .dot {background:#9ba79e}
+.person[data-tone="sage"] .dot {background:#668b70}
+.person[data-tone="blue"] .dot {background:#6d8eae}
+.person[data-tone="rose"] .dot {background:#b77c78}
+.person[data-tone="sand"] .dot {background:#b39a57}
+.person[data-tone="lavender"] .dot {background:#8c7cab}
 
 .resize-handle {
-  position: absolute;
-  width: 32px;
-  height: 32px;
-  right: 2px;
-  bottom: 2px;
-  border-radius: 5px;
-  cursor: nwse-resize;
-  touch-action: none;
+  position:absolute;width:32px;height:32px;
+  right:2px;bottom:2px;border-radius:5px;
+  cursor:nwse-resize;touch-action:none;
   background:
-    linear-gradient(135deg, transparent 45%, #789083 46%, #789083 55%, transparent 56%),
-    linear-gradient(135deg, transparent 65%, #789083 66%, #789083 75%, transparent 76%);
+    linear-gradient(135deg,transparent 45%,#789083 46%,#789083 55%,transparent 56%),
+    linear-gradient(135deg,transparent 65%,#789083 66%,#789083 75%,transparent 76%);
 }
 
-/* SIDEBAR */
+/* Verbindungspunkt */
+
+.relation-hub {
+  cursor:grab;
+  pointer-events:all;
+  stroke:white;
+  stroke-width:3;
+}
+.relation-hub:active {cursor:grabbing}
+.relation-hub.selected {
+  stroke:#b17a39;
+  stroke-width:4;
+}
+.relation-hub-ring {
+  pointer-events:none;
+  fill:none;
+  stroke:#ffffff;
+  stroke-width:2;
+}
+
+/* Sidebar */
 
 .sidebar {
-  background: white;
-  border-left: 1px solid var(--border);
-  padding: 22px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 17px;
-  overflow-y: auto;
+  background:white;border-left:1px solid var(--border);
+  padding:22px 18px;display:flex;
+  flex-direction:column;gap:17px;overflow-y:auto;
 }
-
-.panel-title {
-  font-family: Georgia, serif;
-  font-size: 21px;
-  margin: 0;
-}
-
+.panel-title {font-family:Georgia,serif;font-size:21px;margin:0}
 .muted {
-  color: #7b867e;
-  font-size: 12px;
-  line-height: 1.5;
-  margin-top: -12px;
+  color:#7b867e;font-size:12px;
+  line-height:1.5;margin-top:-12px;
 }
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
+.field {display:flex;flex-direction:column;gap:6px}
 .field label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #778279;
+  font-size:11px;font-weight:700;
+  text-transform:uppercase;color:#778279;
 }
-
 .field input {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 10px;
-  font-size: 13px;
-  background: white;
+  width:100%;border:1px solid var(--border);
+  border-radius:9px;padding:10px;
+  font-size:13px;background:white;
 }
-
-.field input:focus {
-  outline: 2px solid #9eb6a7;
-}
-
+.field input:focus {outline:2px solid #9eb6a7}
 .form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
 }
-
-.colors {
-  display: flex;
-  gap: 9px;
-  flex-wrap: wrap;
-}
-
+.colors {display:flex;gap:9px;flex-wrap:wrap}
 .swatch {
-  width: 29px;
-  height: 29px;
-  border-radius: 8px;
-  padding: 0;
-  border: 2px solid white;
-  box-shadow: 0 0 0 1px #ccd5cc;
+  width:29px;height:29px;border-radius:8px;
+  padding:0;border:2px solid white;
+  box-shadow:0 0 0 1px #ccd5cc;
 }
-
 .swatch[aria-pressed="true"] {
-  box-shadow: 0 0 0 2px var(--green);
+  box-shadow:0 0 0 2px var(--green);
 }
-
-hr {
-  border: 0;
-  border-top: 1px solid #edf0ec;
-  width: 100%;
-}
-
-.side-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.side-actions button { flex: 1; }
-
+hr {border:0;border-top:1px solid #edf0ec;width:100%}
+.side-actions {display:flex;gap:8px}
+.side-actions button {flex:1;min-width:0}
 .tip {
-  background: #f2f5f0;
-  border-radius: 11px;
-  padding: 12px;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #617066;
+  background:#f2f5f0;border-radius:11px;
+  padding:12px;font-size:12px;
+  line-height:1.5;color:#617066;
 }
-
-.status {
-  font-size: 11px;
-  color: #7c877f;
-  margin-top: auto;
-}
-
-/* BEZIEHUNGSAUSWAHL */
+.status {font-size:11px;color:#7c877f;margin-top:auto}
 
 .member-list {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  max-height: 220px;
-  overflow-y: auto;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 9px;
+  display:flex;flex-direction:column;gap:7px;
+  max-height:220px;overflow-y:auto;
+  border:1px solid var(--border);
+  border-radius:9px;padding:9px;
 }
-
 .member-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  cursor: pointer;
-  padding: 3px;
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;cursor:pointer;padding:3px;
 }
-
 .member-option input {
-  accent-color: var(--green);
-  width: 16px;
-  height: 16px;
+  accent-color:var(--green);
+  width:16px;height:16px;
 }
-
-.relation-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
+.relation-list {display:flex;flex-direction:column;gap:6px}
 .relation-item {
-  width: 100%;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  font-weight: 500;
+  width:100%;text-align:left;
+  display:flex;flex-direction:column;gap:3px;
+  font-weight:500;
 }
-
 .relation-item.active {
-  border-color: var(--green);
-  background: #edf3ed;
+  border-color:var(--green);background:#edf3ed;
 }
-
 .relation-item small {
-  color: #7b867e;
-  font-size: 11px;
-  font-weight: 400;
+  color:#7b867e;font-size:11px;font-weight:400;
 }
-
-.side-actions button { min-width: 0; }
-
-/* BEDIENELEMENTE */
+.color-note {font-size:11px;color:#7b867e;margin:0}
 
 .canvas-tools {
-  position: absolute;
-  z-index: 5;
-  left: 15px;
-  top: 15px;
-  display: flex;
-  gap: 6px;
-  background: white;
-  padding: 6px;
-  border: 1px solid var(--border);
-  border-radius: 11px;
+  position:absolute;z-index:5;left:15px;top:15px;
+  display:flex;gap:6px;background:white;
+  padding:6px;border:1px solid var(--border);
+  border-radius:11px;
 }
-
 .zoom {
-  position: absolute;
-  right: 15px;
-  bottom: 15px;
-  z-index: 5;
-  display: flex;
-  gap: 5px;
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  padding: 5px;
+  position:absolute;right:15px;bottom:15px;z-index:5;
+  display:flex;gap:5px;background:white;
+  border:1px solid var(--border);
+  border-radius:11px;padding:5px;
 }
-
 .empty-hint {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #87928a;
-  text-align: center;
-  pointer-events: none;
-  display: none;
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  color:#87928a;text-align:center;
+  pointer-events:none;display:none;
 }
-
 .empty-hint strong {
-  display: block;
-  color: #52645a;
-  margin-bottom: 7px;
+  display:block;color:#52645a;margin-bottom:7px;
 }
 
 @media(max-width:850px) {
   header {
-    height: auto;
-    min-height: 70px;
-    align-items: flex-start;
-    flex-direction: column;
+    height:auto;min-height:70px;
+    align-items:flex-start;flex-direction:column;
   }
-
   .workspace {
-    height: calc(100dvh - 125px);
-    grid-template-columns: 1fr;
+    height:calc(100dvh - 125px);
+    grid-template-columns:1fr;
   }
-
   .sidebar {
-    position: absolute;
-    z-index: 8;
-    right: 0;
-    top: 125px;
-    bottom: 0;
-    width: min(340px, 90vw);
-    border-left: 1px solid var(--border);
-    box-shadow: -5px 0 20px #00000012;
+    position:absolute;z-index:8;right:0;
+    top:125px;bottom:0;width:min(340px,90vw);
+    border-left:1px solid var(--border);
+    box-shadow:-5px 0 20px #00000012;
   }
-
-  .workspace.has-selection .canvas {
-    width: 100%;
-  }
+  .workspace.has-selection .canvas {width:100%}
 }
-
 @media(max-width:520px) {
-  .actions button {
-    font-size: 11px;
-    padding: 8px;
-  }
-
-  .brand strong { font-size: 19px; }
+  .actions button {font-size:11px;padding:8px}
+  .brand strong {font-size:19px}
 }
 </style>
 </head>
 
 <body>
-
 <header>
   <div class="brand">
     <div class="brand-icon">⌘</div>
@@ -479,7 +294,6 @@ hr {
       <small>Dein Stammbaum, frei gestaltet</small>
     </div>
   </div>
-
   <div class="actions">
     <button class="primary" id="addBtn">＋ Person</button>
     <button id="saveBtn">↓ Exportieren</button>
@@ -489,9 +303,7 @@ hr {
 </header>
 
 <div class="workspace" id="workspace">
-
   <main class="canvas" id="canvas">
-
     <div class="canvas-tools">
       <button id="fitBtn">⌖ Ansicht</button>
       <button id="resetBtn">↺ Beispiel</button>
@@ -512,52 +324,49 @@ hr {
       <button id="zoomLabel">100%</button>
       <button id="zoomIn">＋</button>
     </div>
-
   </main>
 
-  <aside class="sidebar">
-
-    <h2 class="panel-title">Person bearbeiten</h2>
-
-    <p class="muted">
+  <aside class="sidebar" id="sidebar">
+    <h2 class="panel-title" id="personPanelTitle">Person bearbeiten</h2>
+    <p class="muted" id="personPanelHint">
       Hier kannst du die ausgewählte Person bearbeiten.
     </p>
 
-    <div class="field">
-      <label for="fullName">Name</label>
-      <input id="fullName" placeholder="Vor- und Nachname">
-    </div>
-
-    <div class="form-grid">
+    <div id="personEditor">
       <div class="field">
-        <label for="birth">Geboren</label>
-        <input id="birth" placeholder="z. B. 1960">
+        <label for="fullName">Name</label>
+        <input id="fullName" placeholder="Vor- und Nachname">
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="birth">Geboren</label>
+          <input id="birth" placeholder="z. B. 1960">
+        </div>
+        <div class="field">
+          <label for="death">Gestorben</label>
+          <input id="death" placeholder="optional">
+        </div>
       </div>
 
       <div class="field">
-        <label for="death">Gestorben</label>
-        <input id="death" placeholder="optional">
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Kastenfarbe</label>
-      <div class="colors" id="colors">
-        <button class="swatch" style="background:#fff" data-tone="white"></button>
-        <button class="swatch" style="background:#e8f0e8" data-tone="sage"></button>
-        <button class="swatch" style="background:#e8eef5" data-tone="blue"></button>
-        <button class="swatch" style="background:#f5e9e7" data-tone="rose"></button>
-        <button class="swatch" style="background:#f4efdf" data-tone="sand"></button>
-        <button class="swatch" style="background:#efebf6" data-tone="lavender"></button>
+        <label>Kastenfarbe</label>
+        <div class="colors" id="colors">
+          <button class="swatch" style="background:#fff" data-tone="white"></button>
+          <button class="swatch" style="background:#e8f0e8" data-tone="sage"></button>
+          <button class="swatch" style="background:#e8eef5" data-tone="blue"></button>
+          <button class="swatch" style="background:#f5e9e7" data-tone="rose"></button>
+          <button class="swatch" style="background:#f4efdf" data-tone="sand"></button>
+          <button class="swatch" style="background:#efebf6" data-tone="lavender"></button>
+        </div>
       </div>
     </div>
 
     <hr>
 
-    <h2 class="panel-title">Beziehungen</h2>
-
-    <p class="muted">
-      Wähle mehrere Personen aus, um sie zu einer gemeinsamen Beziehung zu verbinden.
+    <h2 class="panel-title" id="relationPanelTitle">Beziehungen</h2>
+    <p class="muted" id="relationPanelHint">
+      Wähle einen Verbindungspunkt aus, um die Beziehung zu bearbeiten.
     </p>
 
     <div class="field">
@@ -568,6 +377,20 @@ hr {
     <div class="field">
       <label>Beteiligte Personen</label>
       <div class="member-list" id="memberList"></div>
+    </div>
+
+    <div class="field">
+      <label>Linienfarbe</label>
+      <div class="colors" id="relationColors">
+        <button class="swatch" style="background:#8da094" data-color="#8da094" aria-label="Grün"></button>
+        <button class="swatch" style="background:#6d8eae" data-color="#6d8eae" aria-label="Blau"></button>
+        <button class="swatch" style="background:#b77c78" data-color="#b77c78" aria-label="Rosa"></button>
+        <button class="swatch" style="background:#b39a57" data-color="#b39a57" aria-label="Gold"></button>
+        <button class="swatch" style="background:#8c7cab" data-color="#8c7cab" aria-label="Lila"></button>
+        <button class="swatch" style="background:#59616a" data-color="#59616a" aria-label="Grau"></button>
+        <button class="swatch" style="background:#26342e" data-color="#26342e" aria-label="Schwarz"></button>
+      </div>
+      <p class="color-note">Die Farbe wird für alle Linien dieser Beziehung verwendet.</p>
     </div>
 
     <button class="primary" id="createRelationBtn">＋ Beziehung erstellen</button>
@@ -582,16 +405,13 @@ hr {
       <button id="deletePersonBtn">Person löschen</button>
     </div>
 
-    <div class="tip" id="tip">
-      Apple Pencil: Ziehe von einer Person zur anderen, um eine Verbindung zu erstellen.
-      Für Beziehungen mit mehreren Personen wähle die Beteiligten in der Seitenleiste aus.
-      Ein Finger bewegt Kästen. Zwei Finger zoomen und verschieben.
+    <div class="tip">
+      Tippe auf einen Verbindungspunkt, um seine Einstellungen zu öffnen.
+      Ziehe den Punkt an eine andere Stelle, um den Verlauf der Linien zu verändern.
+      Für neue Beziehungen kannst du mehrere Personen auswählen.
     </div>
 
-    <div class="status" id="status">
-      Lokal gespeichert.
-    </div>
-
+    <div class="status" id="status">Lokal gespeichert.</div>
   </aside>
 </div>
 
@@ -613,22 +433,23 @@ let relations = [];
 let selected = null;
 let selectedRelation = null;
 let selectedMembers = [];
+let selectedRelationColor = "#8da094";
 let nextId = 1;
 
 let scale = 1;
-let offset = {x:0, y:0};
+let offset = {x:0,y:0};
 
 let drag = null;
 let resizeDrag = null;
 let relationDrag = null;
+let hubDrag = null;
 
 let touchPoints = new Map();
 let pinch = null;
 let suppressClick = false;
 
 const colors = [
-  "white", "sage", "blue",
-  "rose", "sand", "lavender"
+  "white","sage","blue","rose","sand","lavender"
 ];
 
 const examplePeople = [
@@ -638,30 +459,40 @@ const examplePeople = [
   {id:4,name:"Tochter",birth:"1982",death:"",tone:"rose",x:700,y:440,w:190,h:112}
 ];
 
+function getPerson(id) {
+  return people.find(p => p.id === Number(id));
+}
+
 function normalizeRelation(r) {
   let members = Array.isArray(r.members)
     ? r.members
-    : [r.from, r.to];
+    : [r.from,r.to];
 
   members = [...new Set(
-    members.map(Number).filter(id =>
-      people.some(p => p.id === id)
-    )
+    members.map(Number).filter(id => people.some(p => p.id === id))
   )];
 
   return {
-    id: r.id ?? Date.now() + Math.random(),
+    id:r.id ?? nextId++,
     members,
-    label: r.label || "Verbunden mit"
+    label:r.label || "Verbunden mit",
+    color:r.color || "#8da094",
+    point:r.point && Number.isFinite(r.point.x) && Number.isFinite(r.point.y)
+      ? {x:r.point.x,y:r.point.y}
+      : null
   };
 }
 
 function example() {
   people = examplePeople.map(p => ({...p}));
 
-  relations = [
-    {id:1,members:[1,2,3,4],label:"Eltern und Kinder"}
-  ];
+  relations = [{
+    id:1,
+    members:[1,2,3,4],
+    label:"Eltern und Kinder",
+    color:"#8da094",
+    point:{x:600,y:350}
+  }];
 
   nextId = 5;
   selected = null;
@@ -697,47 +528,60 @@ function esc(value) {
   );
 }
 
-function getPerson(id) {
-  return people.find(p => p.id === Number(id));
-}
-
 function getBox(p) {
+  const w = p.w || 190;
+  const h = p.h || 112;
+
   return {
-    left: p.x,
-    top: p.y,
-    right: p.x + (p.w || 190),
-    bottom: p.y + (p.h || 112),
-    cx: p.x + (p.w || 190) / 2,
-    cy: p.y + (p.h || 112) / 2
+    left:p.x,
+    top:p.y,
+    right:p.x+w,
+    bottom:p.y+h,
+    cx:p.x+w/2,
+    cy:p.y+h/2,
+    w,h
   };
 }
 
-/*
- * Ermittelt den passendsten Randpunkt zwischen zwei Kästen.
- * Die Linie dockt damit nicht mehr grundsätzlich oben oder unten an.
- */
-function getAnchor(a, b) {
-  const A = getBox(a);
-  const B = getBox(b);
+/* Passenden Anschluss am Personenkasten bestimmen */
 
-  const dx = B.cx - A.cx;
-  const dy = B.cy - A.cy;
+function getAnchor(p, point) {
+  const b = getBox(p);
+  const dx = point.x-b.cx;
+  const dy = point.y-b.cy;
 
-  const halfW = (a.w || 190) / 2;
-  const halfH = (a.h || 112) / 2;
-
-  if (Math.abs(dx) * halfH > Math.abs(dy) * halfW) {
+  if (Math.abs(dx)*b.h > Math.abs(dy)*b.w) {
     return {
-      x: A.cx + Math.sign(dx || 1) * halfW,
-      y: A.cy
+      x:b.cx + Math.sign(dx || 1)*b.w/2,
+      y:b.cy
     };
   }
 
   return {
-    x: A.cx,
-    y: A.cy + Math.sign(dy || 1) * halfH
+    x:b.cx,
+    y:b.cy + Math.sign(dy || 1)*b.h/2
   };
 }
+
+function defaultRelationPoint(members) {
+  const boxes = members.map(getBox).filter(Boolean);
+
+  if (!boxes.length) return {x:500,y:400};
+
+  return {
+    x:boxes.reduce((s,b)=>s+b.cx,0)/boxes.length,
+    y:boxes.reduce((s,b)=>s+b.cy,0)/boxes.length
+  };
+}
+
+function getRelationPoint(r) {
+  if (r.point) return r.point;
+
+  const members = (r.members || []).map(getPerson).filter(Boolean);
+  return defaultRelationPoint(members);
+}
+
+/* Personen zeichnen */
 
 function render() {
   nodes.innerHTML = "";
@@ -751,10 +595,10 @@ function render() {
     el.dataset.id = p.id;
     el.dataset.tone = colors.includes(p.tone) ? p.tone : "white";
 
-    el.style.left = p.x + "px";
-    el.style.top = p.y + "px";
-    el.style.width = (p.w || 190) + "px";
-    el.style.height = (p.h || 112) + "px";
+    el.style.left = p.x+"px";
+    el.style.top = p.y+"px";
+    el.style.width = (p.w || 190)+"px";
+    el.style.height = (p.h || 112)+"px";
 
     el.innerHTML = `
       <div class="name">
@@ -762,8 +606,8 @@ function render() {
         ${esc(p.name || "Unbenannte Person")}
       </div>
       <div class="dates">
-        ${p.birth ? "✳ " + fmt(p.birth) : "Geburtsdatum unbekannt"}
-        ${p.death ? "<br>✝ " + fmt(p.death) : ""}
+        ${p.birth ? "✳ "+fmt(p.birth) : "Geburtsdatum unbekannt"}
+        ${p.death ? "<br>✝ "+fmt(p.death) : ""}
       </div>
       <div class="resize-handle"></div>
     `;
@@ -775,6 +619,8 @@ function render() {
   $("emptyHint").style.display = people.length ? "none" : "block";
 }
 
+/* Beziehungen und Verbindungspunkte zeichnen */
+
 function drawLinks() {
   links.innerHTML = "";
 
@@ -785,117 +631,118 @@ function drawLinks() {
 
     if (members.length < 2) return;
 
-    /*
-     * Ein gemeinsamer Verbindungspunkt wird aus den Mittelpunkten
-     * aller beteiligten Personen berechnet.
-     */
-    const centers = members.map(getBox);
-
-    const center = {
-      x: centers.reduce((sum, b) => sum + b.cx, 0) / centers.length,
-      y: centers.reduce((sum, b) => sum + b.cy, 0) / centers.length
-    };
-
-    const group = document.createElementNS(
-      "http://www.w3.org/2000/svg", "g"
-    );
-
-    const isSelected = selectedRelation === r.id;
+    const point = getRelationPoint(r);
+    const color = r.color || "#8da094";
 
     members.forEach(p => {
-      const anchor = getAnchor(p, center);
-
-      const path = document.createElementNS(
-        "http://www.w3.org/2000/svg", "path"
-      );
-
-      const dx = center.x - anchor.x;
-      const dy = center.y - anchor.y;
+      const anchor = getAnchor(p,point);
+      const dx = point.x-anchor.x;
+      const dy = point.y-anchor.y;
 
       const bend = Math.min(
-        70,
-        Math.max(25, Math.hypot(dx, dy) * 0.35)
+        75,
+        Math.max(25,Math.hypot(dx,dy)*0.35)
       );
 
       let c1x = anchor.x;
       let c1y = anchor.y;
-      let c2x = center.x;
-      let c2y = center.y;
+      let c2x = point.x;
+      let c2y = point.y;
 
       if (Math.abs(dx) > Math.abs(dy)) {
-        c1x += Math.sign(dx) * bend;
-        c2x -= Math.sign(dx) * bend;
+        c1x += Math.sign(dx)*bend;
+        c2x -= Math.sign(dx)*bend;
       } else {
-        c1y += Math.sign(dy) * bend;
-        c2y -= Math.sign(dy) * bend;
+        c1y += Math.sign(dy)*bend;
+        c2y -= Math.sign(dy)*bend;
       }
+
+      const path = document.createElementNS(
+        "http://www.w3.org/2000/svg","path"
+      );
 
       path.setAttribute(
         "d",
-        `M ${anchor.x} ${anchor.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${center.x} ${center.y}`
+        `M ${anchor.x} ${anchor.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${point.x} ${point.y}`
       );
+      path.setAttribute("fill","none");
+      path.setAttribute("stroke",color);
+      path.setAttribute("stroke-width","2.7");
+      path.setAttribute("stroke-linecap","round");
+      path.style.pointerEvents = "none";
 
-      path.setAttribute("fill", "none");
-      path.setAttribute(
-        "stroke",
-        isSelected ? "#b17a39" : "#8da094"
-      );
-      path.setAttribute("stroke-width", "2.5");
-      path.setAttribute("stroke-linecap", "round");
-      path.style.pointerEvents = "stroke";
-      path.style.cursor = "pointer";
-
-      path.addEventListener("click", e => {
-        e.stopPropagation();
-        selectedRelation = r.id;
-        selected = null;
-        selectedMembers = [...r.members];
-        syncPanel();
-        render();
-      });
-
-      group.appendChild(path);
+      links.appendChild(path);
     });
 
     const hub = document.createElementNS(
-      "http://www.w3.org/2000/svg", "circle"
+      "http://www.w3.org/2000/svg","circle"
     );
 
-    hub.setAttribute("cx", center.x);
-    hub.setAttribute("cy", center.y);
-    hub.setAttribute("r", "5");
-    hub.setAttribute("fill", isSelected ? "#b17a39" : "#8da094");
-    hub.style.pointerEvents = "all";
-    hub.style.cursor = "pointer";
+    hub.setAttribute("cx",point.x);
+    hub.setAttribute("cy",point.y);
+    hub.setAttribute("r","10");
+    hub.setAttribute("fill",color);
+    hub.setAttribute("class","relation-hub");
 
-    hub.addEventListener("click", e => {
+    if (selectedRelation === r.id) {
+      hub.classList.add("selected");
+    }
+
+    hub.dataset.relationId = r.id;
+
+    hub.addEventListener("pointerdown",e => {
       e.stopPropagation();
-      selectedRelation = r.id;
-      selected = null;
-      selectedMembers = [...r.members];
-      syncPanel();
-      render();
+      e.preventDefault();
+
+      selectRelation(r.id);
+
+      hubDrag = {
+        id:r.id,
+        pointerId:e.pointerId,
+        startX:e.clientX,
+        startY:e.clientY,
+        moved:false
+      };
+
+      try {
+        canvas.setPointerCapture(e.pointerId);
+      } catch(err) {}
     });
 
-    group.appendChild(hub);
+    hub.addEventListener("click",e => {
+      e.stopPropagation();
+      selectRelation(r.id);
+    });
+
+    links.appendChild(hub);
+
+    const ring = document.createElementNS(
+      "http://www.w3.org/2000/svg","circle"
+    );
+    ring.setAttribute("cx",point.x);
+    ring.setAttribute("cy",point.y);
+    ring.setAttribute("r","15");
+    ring.setAttribute("class","relation-hub-ring");
+    links.appendChild(ring);
 
     const text = document.createElementNS(
-      "http://www.w3.org/2000/svg", "text"
+      "http://www.w3.org/2000/svg","text"
     );
 
-    text.setAttribute("x", center.x);
-    text.setAttribute("y", center.y - 12);
-    text.setAttribute("text-anchor", "middle");
-    text.setAttribute("font-size", "12");
-    text.setAttribute("font-family", "system-ui");
-    text.setAttribute("fill", "#61766a");
+    text.setAttribute("x",point.x);
+    text.setAttribute("y",point.y-20);
+    text.setAttribute("text-anchor","middle");
+    text.setAttribute("font-size","12");
+    text.setAttribute("font-family","system-ui");
+    text.setAttribute("fill",color);
     text.style.pointerEvents = "none";
-    text.textContent = r.label;
+    text.textContent = r.label || "";
 
-    group.appendChild(text);
-    links.appendChild(group);
+    links.appendChild(text);
   });
 }
+
+/* Beteiligte Personen im Menü */
 
 function renderMemberList() {
   const list = $("memberList");
@@ -915,7 +762,7 @@ function renderMemberList() {
     checkbox.value = p.id;
     checkbox.checked = selectedMembers.includes(p.id);
 
-    checkbox.addEventListener("change", () => {
+    checkbox.addEventListener("change",() => {
       if (checkbox.checked) {
         if (!selectedMembers.includes(p.id)) {
           selectedMembers.push(p.id);
@@ -928,8 +775,7 @@ function renderMemberList() {
     const span = document.createElement("span");
     span.textContent = p.name || "Unbenannte Person";
 
-    label.appendChild(checkbox);
-    label.appendChild(span);
+    label.append(checkbox,span);
     list.appendChild(label);
   });
 }
@@ -951,37 +797,52 @@ function renderRelationList() {
       button.classList.add("active");
     }
 
-    const names = (r.members || [])
-      .map(getPerson)
-      .filter(Boolean)
-      .map(p => p.name || "Unbenannte Person");
-
     const title = document.createElement("span");
     title.textContent = r.label || "Beziehung";
 
     const detail = document.createElement("small");
-    detail.textContent = names.join(" · ");
+    detail.textContent = (r.members || [])
+      .map(getPerson)
+      .filter(Boolean)
+      .map(p => p.name || "Unbenannte Person")
+      .join(" · ");
 
-    button.appendChild(title);
-    button.appendChild(detail);
+    button.append(title,detail);
 
-    button.addEventListener("click", () => {
-      selectedRelation = r.id;
-      selected = null;
-      selectedMembers = [...r.members];
-      syncPanel();
-      render();
+    button.addEventListener("click",() => {
+      selectRelation(r.id);
     });
 
     list.appendChild(button);
   });
 }
 
+function syncColorButtons() {
+  $("relationColors").querySelectorAll("[data-color]").forEach(b => {
+    b.setAttribute(
+      "aria-pressed",
+      String(b.dataset.color === selectedRelationColor)
+    );
+  });
+}
+
 function syncPanel() {
-  workspace.classList.toggle(
-    "has-selection",
-    selected !== null || selectedRelation !== null
-  );
+  const hasPerson = selected !== null;
+  const hasRelation = selectedRelation !== null;
+
+  workspace.classList.toggle("has-selection",hasPerson || hasRelation);
+
+  $("personEditor").style.display = hasPerson ? "flex" : "none";
+  $("personEditor").style.flexDirection = "column";
+  $("personEditor").style.gap = "17px";
+
+  $("personPanelTitle").textContent = hasPerson
+    ? "Person bearbeiten"
+    : "Personen";
+
+  $("personPanelHint").textContent = hasPerson
+    ? "Hier kannst du die ausgewählte Person bearbeiten."
+    : "Wähle eine Person auf der Zeichenfläche aus.";
 
   const p = people.find(x => x.id === selected);
 
@@ -998,43 +859,72 @@ function syncPanel() {
 
   const r = relations.find(x => x.id === selectedRelation);
 
+  $("relationPanelTitle").textContent = hasRelation
+    ? "Beziehung bearbeiten"
+    : "Beziehungen";
+
+  $("relationPanelHint").textContent = hasRelation
+    ? "Ändere die Beteiligten, die Farbe oder die Position des Verbindungspunktes."
+    : "Wähle mehrere Personen aus und erstelle eine neue Beziehung.";
+
   $("relationName").value = r?.label || "";
 
-  if (r && selectedMembers.length === 0) {
+  if (r) {
     selectedMembers = [...r.members];
+    selectedRelationColor = r.color || "#8da094";
   }
 
+  syncColorButtons();
   renderMemberList();
   renderRelationList();
 }
+
+/* Beziehung auswählen */
+
+function selectRelation(id) {
+  const r = relations.find(x => x.id === id);
+  if (!r) return;
+
+  selectedRelation = id;
+  selected = null;
+  selectedMembers = [...r.members];
+  selectedRelationColor = r.color || "#8da094";
+
+  syncPanel();
+  drawLinks();
+}
+
+/* Speichern */
 
 function persist() {
   try {
     localStorage.setItem(
       "familienatlas-v3",
-      JSON.stringify({people, relations, nextId})
+      JSON.stringify({people,relations,nextId})
     );
 
     $("status").textContent =
-      "Gespeichert · " + new Date().toLocaleTimeString("de-DE");
+      "Gespeichert · "+new Date().toLocaleTimeString("de-DE");
   } catch(e) {
     $("status").textContent = "Speichern nicht möglich.";
   }
 }
+
+/* Personen bearbeiten */
 
 function addPerson() {
   const id = nextId++;
 
   people.push({
     id,
-    name: "Neue Person",
-    birth: "",
-    death: "",
-    tone: "white",
-    x: 250 + Math.random() * 400,
-    y: 200 + Math.random() * 300,
-    w: 190,
-    h: 112
+    name:"Neue Person",
+    birth:"",
+    death:"",
+    tone:"white",
+    x:250+Math.random()*400,
+    y:200+Math.random()*300,
+    w:190,
+    h:112
   });
 
   selected = id;
@@ -1046,8 +936,8 @@ function addPerson() {
   persist();
 }
 
-function updatePerson(key, value) {
-  const p = people.find(x => x.id === selected);
+function updatePerson(key,value) {
+  const p = getPerson(selected);
   if (!p) return;
 
   p[key] = value;
@@ -1056,25 +946,27 @@ function updatePerson(key, value) {
   persist();
 }
 
-$("fullName").addEventListener("input", e =>
-  updatePerson("name", e.target.value)
+$("fullName").addEventListener("input",e =>
+  updatePerson("name",e.target.value)
 );
 
-$("birth").addEventListener("change", e =>
-  updatePerson("birth", e.target.value)
+$("birth").addEventListener("change",e =>
+  updatePerson("birth",e.target.value)
 );
 
-$("death").addEventListener("change", e =>
-  updatePerson("death", e.target.value)
+$("death").addEventListener("change",e =>
+  updatePerson("death",e.target.value)
 );
 
-$("colors").addEventListener("click", e => {
+$("colors").addEventListener("click",e => {
   const b = e.target.closest("[data-tone]");
   if (!b || selected === null) return;
-  updatePerson("tone", b.dataset.tone);
+  updatePerson("tone",b.dataset.tone);
 });
 
-$("relationName").addEventListener("input", e => {
+/* Beziehung bearbeiten */
+
+$("relationName").addEventListener("input",e => {
   const r = relations.find(x => x.id === selectedRelation);
   if (!r) return;
 
@@ -1084,7 +976,22 @@ $("relationName").addEventListener("input", e => {
   persist();
 });
 
-/* MEHRPERSONEN-BEZIEHUNG ERSTELLEN */
+$("relationColors").addEventListener("click",e => {
+  const b = e.target.closest("[data-color]");
+  if (!b || selectedRelation === null) return;
+
+  const r = relations.find(x => x.id === selectedRelation);
+  if (!r) return;
+
+  r.color = b.dataset.color;
+  selectedRelationColor = r.color;
+
+  syncColorButtons();
+  drawLinks();
+  persist();
+});
+
+/* Neue Beziehung oder bestehende bearbeiten */
 
 $("createRelationBtn").onclick = () => {
   const members = [...new Set(
@@ -1096,27 +1003,27 @@ $("createRelationBtn").onclick = () => {
     return;
   }
 
-  const label =
-    $("relationName").value.trim() || "Verbunden mit";
+  const label = $("relationName").value.trim() || "Verbunden mit";
 
-  let relation = relations.find(
-    r => r.id === selectedRelation
-  );
+  let r = relations.find(x => x.id === selectedRelation);
 
-  if (relation) {
-    relation.members = members;
-    relation.label = label;
+  if (r) {
+    r.members = members;
+    r.label = label;
+    r.color = selectedRelationColor;
   } else {
-    relation = {
-      id: nextId++,
+    r = {
+      id:nextId++,
       members,
-      label
+      label,
+      color:selectedRelationColor,
+      point:defaultRelationPoint(members.map(getPerson))
     };
 
-    relations.push(relation);
+    relations.push(r);
   }
 
-  selectedRelation = relation.id;
+  selectedRelation = r.id;
   selected = null;
   selectedMembers = [...members];
 
@@ -1125,7 +1032,7 @@ $("createRelationBtn").onclick = () => {
   persist();
 };
 
-/* PERSON LÖSCHEN */
+/* Person löschen */
 
 $("deletePersonBtn").onclick = () => {
   if (selected === null) return;
@@ -1138,7 +1045,7 @@ $("deletePersonBtn").onclick = () => {
   relations = relations
     .map(r => ({
       ...r,
-      members: r.members.filter(id => id !== deletedId)
+      members:r.members.filter(id => id !== deletedId)
     }))
     .filter(r => r.members.length >= 2);
 
@@ -1151,7 +1058,7 @@ $("deletePersonBtn").onclick = () => {
   persist();
 };
 
-/* BEZIEHUNG LÖSCHEN */
+/* Beziehung löschen */
 
 $("deleteRelationBtn").onclick = () => {
   if (selectedRelation === null) return;
@@ -1170,6 +1077,7 @@ function selectPerson(id) {
   selected = id;
   selectedRelation = null;
   selectedMembers = [id];
+
   syncPanel();
   render();
 }
@@ -1180,42 +1088,38 @@ function capturePointer(e) {
   } catch(err) {}
 }
 
-function startMove(id, e) {
-  const p = people.find(x => x.id === id);
+function startMove(id,e) {
+  const p = getPerson(id);
   if (!p) return;
 
   selectPerson(id);
 
   drag = {
     id,
-    startX: e.clientX,
-    startY: e.clientY,
-    origX: p.x,
-    origY: p.y
+    startX:e.clientX,
+    startY:e.clientY,
+    origX:p.x,
+    origY:p.y
   };
 }
 
-function startResize(id, e) {
-  const p = people.find(x => x.id === id);
+function startResize(id,e) {
+  const p = getPerson(id);
   if (!p) return;
 
   selectPerson(id);
 
   resizeDrag = {
     id,
-    startX: e.clientX,
-    startY: e.clientY,
-    startW: p.w || 190,
-    startH: p.h || 112
+    startX:e.clientX,
+    startY:e.clientY,
+    startW:p.w || 190,
+    startH:p.h || 112
   };
 }
 
-function startRelation(id, e) {
-  relationDrag = {
-    from: id,
-    pointerId: e.pointerId
-  };
-
+function startRelation(id,e) {
+  relationDrag = {from:id,pointerId:e.pointerId};
   suppressClick = true;
   capturePointer(e);
 }
@@ -1226,7 +1130,7 @@ function finishRelation(e) {
   const from = relationDrag.from;
   relationDrag = null;
 
-  const hit = document.elementFromPoint(e.clientX, e.clientY);
+  const hit = document.elementFromPoint(e.clientX,e.clientY);
   const target = hit?.closest(".person");
 
   if (target && Number(target.dataset.id) !== from) {
@@ -1239,15 +1143,22 @@ function finishRelation(e) {
 
     if (label !== null) {
       const r = {
-        id: nextId++,
-        members: [from, to],
-        label: label.trim() || "Verbunden mit"
+        id:nextId++,
+        members:[from,to],
+        label:label.trim() || "Verbunden mit",
+        color:"#8da094",
+        point:null
       };
+
+      r.point = defaultRelationPoint(
+        r.members.map(getPerson)
+      );
 
       relations.push(r);
       selected = null;
       selectedRelation = r.id;
       selectedMembers = [...r.members];
+      selectedRelationColor = r.color;
 
       syncPanel();
       persist();
@@ -1258,151 +1169,160 @@ function finishRelation(e) {
 
   setTimeout(() => {
     suppressClick = false;
-  }, 150);
+  },150);
 }
 
-// START: FINGER, MAUS UND APPLE PENCIL
+/* Position des Verbindungspunktes verschieben */
 
-canvas.addEventListener("pointerdown", e => {
+function moveHubToPointer(e) {
+  if (!hubDrag) return;
+
+  const r = relations.find(x => x.id === hubDrag.id);
+  if (!r) return;
+
+  const rect = world.getBoundingClientRect();
+
+  r.point = {
+    x:(e.clientX-rect.left)/scale,
+    y:(e.clientY-rect.top)/scale
+  };
+
+  drawLinks();
+  hubDrag.moved = true;
+}
+
+/* Pointer-Eingaben */
+
+canvas.addEventListener("pointerdown",e => {
   const card = e.target.closest(".person");
 
-  // APPLE PENCIL: Beziehungen zeichnen
   if (e.pointerType === "pen") {
     if (card) {
       e.preventDefault();
-      startRelation(Number(card.dataset.id), e);
+      startRelation(Number(card.dataset.id),e);
     }
     return;
   }
 
-  // TOUCH: Finger erfassen
   if (e.pointerType === "touch") {
     e.preventDefault();
     capturePointer(e);
 
-    touchPoints.set(e.pointerId, {
-      x: e.clientX,
-      y: e.clientY
-    });
+    touchPoints.set(e.pointerId,{x:e.clientX,y:e.clientY});
 
-    // Zwei Finger: Zoom und Verschieben
     if (touchPoints.size === 2) {
       drag = null;
       resizeDrag = null;
+      hubDrag = null;
 
       const pts = [...touchPoints.values()];
       const center = {
-        x: (pts[0].x + pts[1].x) / 2,
-        y: (pts[0].y + pts[1].y) / 2
+        x:(pts[0].x+pts[1].x)/2,
+        y:(pts[0].y+pts[1].y)/2
       };
 
       const distance = Math.hypot(
-        pts[1].x - pts[0].x,
-        pts[1].y - pts[0].y
+        pts[1].x-pts[0].x,
+        pts[1].y-pts[0].y
       );
 
       pinch = {
         distance,
         scale,
-        worldX: (center.x - offset.x) / scale,
-        worldY: (center.y - offset.y) / scale
+        worldX:(center.x-offset.x)/scale,
+        worldY:(center.y-offset.y)/scale
       };
 
       return;
     }
 
-    // Nur ein Finger
     if (touchPoints.size === 1 && card) {
       const id = Number(card.dataset.id);
 
       if (e.target.closest(".resize-handle")) {
-        startResize(id, e);
+        startResize(id,e);
       } else {
-        startMove(id, e);
+        startMove(id,e);
       }
     }
 
     return;
   }
 
-  // MAUS
   if (e.pointerType === "mouse" && card) {
     capturePointer(e);
 
     const id = Number(card.dataset.id);
 
     if (e.target.closest(".resize-handle")) {
-      startResize(id, e);
+      startResize(id,e);
     } else {
-      startMove(id, e);
+      startMove(id,e);
     }
   }
-}, {passive: false});
+},{passive:false});
 
-// BEWEGUNG
+canvas.addEventListener("pointermove",e => {
+  if (hubDrag && hubDrag.pointerId === e.pointerId) {
+    if (Math.hypot(
+      e.clientX-hubDrag.startX,
+      e.clientY-hubDrag.startY
+    ) > 3) {
+      moveHubToPointer(e);
+    }
+    return;
+  }
 
-canvas.addEventListener("pointermove", e => {
-
-  // APPLE PENCIL: Vorschau der Beziehung
   if (relationDrag && e.pointerType === "pen") {
-    const a = people.find(p => p.id === relationDrag.from);
+    const a = getPerson(relationDrag.from);
     if (!a) return;
 
     const rect = world.getBoundingClientRect();
 
-    const x1 = a.x + (a.w || 190) / 2;
-    const y1 = a.y + (a.h || 112) / 2;
-    const x2 = (e.clientX - rect.left) / scale;
-    const y2 = (e.clientY - rect.top) / scale;
+    const x1 = a.x+(a.w || 190)/2;
+    const y1 = a.y+(a.h || 112)/2;
+    const x2 = (e.clientX-rect.left)/scale;
+    const y2 = (e.clientY-rect.top)/scale;
 
     drawLinks();
 
     const line = document.createElementNS(
-      "http://www.w3.org/2000/svg", "path"
+      "http://www.w3.org/2000/svg","path"
     );
 
-    line.setAttribute("d", `M ${x1} ${y1} L ${x2} ${y2}`);
-    line.setAttribute("stroke", "#b17a39");
-    line.setAttribute("stroke-width", "3");
-    line.setAttribute("stroke-dasharray", "7 5");
-    line.setAttribute("fill", "none");
+    line.setAttribute("d",`M ${x1} ${y1} L ${x2} ${y2}`);
+    line.setAttribute("stroke","#b17a39");
+    line.setAttribute("stroke-width","3");
+    line.setAttribute("stroke-dasharray","7 5");
+    line.setAttribute("fill","none");
 
     links.appendChild(line);
     return;
   }
 
-  // TOUCH: Position aktualisieren
   if (e.pointerType === "touch") {
     if (!touchPoints.has(e.pointerId)) return;
 
-    touchPoints.set(e.pointerId, {
-      x: e.clientX,
-      y: e.clientY
-    });
+    touchPoints.set(e.pointerId,{x:e.clientX,y:e.clientY});
 
-    // Zwei Finger: Zoom und Verschieben
     if (touchPoints.size === 2 && pinch) {
       const pts = [...touchPoints.values()];
 
       const center = {
-        x: (pts[0].x + pts[1].x) / 2,
-        y: (pts[0].y + pts[1].y) / 2
+        x:(pts[0].x+pts[1].x)/2,
+        y:(pts[0].y+pts[1].y)/2
       };
 
       const distance = Math.hypot(
-        pts[1].x - pts[0].x,
-        pts[1].y - pts[0].y
+        pts[1].x-pts[0].x,
+        pts[1].y-pts[0].y
       );
 
-      const factor = distance / pinch.distance;
+      const factor = distance/pinch.distance;
 
-      scale = Math.max(
-        0.25,
-        Math.min(2.5, pinch.scale * factor)
-      );
-
-      offset.x = center.x - pinch.worldX * scale;
-      offset.y = center.y - pinch.worldY * scale;
+      scale = Math.max(0.25,Math.min(2.5,pinch.scale*factor));
+      offset.x = center.x-pinch.worldX*scale;
+      offset.y = center.y-pinch.worldY*scale;
 
       applyTransform();
       return;
@@ -1411,34 +1331,25 @@ canvas.addEventListener("pointermove", e => {
     if (touchPoints.size !== 1) return;
   }
 
-  // KASTEN GRÖSSER ODER KLEINER ZIEHEN
   if (resizeDrag) {
-    const p = people.find(x => x.id === resizeDrag.id);
+    const p = getPerson(resizeDrag.id);
     if (!p) return;
 
-    p.w = Math.max(
-      150,
-      Math.min(
-        500,
-        resizeDrag.startW +
-        (e.clientX - resizeDrag.startX) / scale
-      )
-    );
+    p.w = Math.max(150,Math.min(
+      500,
+      resizeDrag.startW+(e.clientX-resizeDrag.startX)/scale
+    ));
 
-    p.h = Math.max(
-      100,
-      Math.min(
-        400,
-        resizeDrag.startH +
-        (e.clientY - resizeDrag.startY) / scale
-      )
-    );
+    p.h = Math.max(100,Math.min(
+      400,
+      resizeDrag.startH+(e.clientY-resizeDrag.startY)/scale
+    ));
 
     const el = nodes.querySelector(`[data-id="${p.id}"]`);
 
     if (el) {
-      el.style.width = p.w + "px";
-      el.style.height = p.h + "px";
+      el.style.width = p.w+"px";
+      el.style.height = p.h+"px";
     }
 
     drawLinks();
@@ -1446,26 +1357,25 @@ canvas.addEventListener("pointermove", e => {
     return;
   }
 
-  // PERSONENKASTEN VERSCHIEBEN
   if (drag) {
-    const p = people.find(x => x.id === drag.id);
+    const p = getPerson(drag.id);
     if (!p) return;
 
     p.x = Math.max(
       0,
-      drag.origX + (e.clientX - drag.startX) / scale
+      drag.origX+(e.clientX-drag.startX)/scale
     );
 
     p.y = Math.max(
       0,
-      drag.origY + (e.clientY - drag.startY) / scale
+      drag.origY+(e.clientY-drag.startY)/scale
     );
 
     const el = nodes.querySelector(`[data-id="${p.id}"]`);
 
     if (el) {
-      el.style.left = p.x + "px";
-      el.style.top = p.y + "px";
+      el.style.left = p.x+"px";
+      el.style.top = p.y+"px";
     }
 
     drawLinks();
@@ -1473,9 +1383,22 @@ canvas.addEventListener("pointermove", e => {
   }
 });
 
-// ENDE EINER BERÜHRUNG
-
 function finishPointer(e) {
+  if (hubDrag && hubDrag.pointerId === e.pointerId) {
+    const moved = hubDrag.moved;
+    hubDrag = null;
+
+    if (moved) {
+      persist();
+      render();
+      syncPanel();
+      suppressClick = true;
+      setTimeout(() => suppressClick = false,150);
+    }
+
+    return;
+  }
+
   if (relationDrag && e.pointerType === "pen") {
     finishRelation(e);
     return;
@@ -1503,22 +1426,23 @@ function finishPointer(e) {
   }
 }
 
-canvas.addEventListener("pointerup", finishPointer);
+canvas.addEventListener("pointerup",finishPointer);
 
-canvas.addEventListener("pointercancel", e => {
+canvas.addEventListener("pointercancel",e => {
   touchPoints.delete(e.pointerId);
 
   drag = null;
   resizeDrag = null;
   relationDrag = null;
+  hubDrag = null;
   pinch = null;
 
   drawLinks();
 });
 
-// LEERE FLÄCHE ANTIPPen
+/* Leere Fläche anklicken */
 
-canvas.addEventListener("click", e => {
+canvas.addEventListener("click",e => {
   if (suppressClick) {
     suppressClick = false;
     return;
@@ -1533,33 +1457,33 @@ canvas.addEventListener("click", e => {
     selected = null;
     selectedRelation = null;
     selectedMembers = [];
+
     syncPanel();
     render();
   }
 });
 
-// ZOOM
+/* Zoom */
 
 function applyTransform() {
   world.style.transform =
     `translate(${offset.x}px,${offset.y}px) scale(${scale})`;
 
-  $("zoomLabel").textContent =
-    Math.round(scale * 100) + "%";
+  $("zoomLabel").textContent = Math.round(scale*100)+"%";
 }
 
 function zoomAtCenter(change) {
   const rect = canvas.getBoundingClientRect();
-  const cx = rect.width / 2;
-  const cy = rect.height / 2;
+  const cx = rect.width/2;
+  const cy = rect.height/2;
 
-  const wx = (cx - offset.x) / scale;
-  const wy = (cy - offset.y) / scale;
+  const wx = (cx-offset.x)/scale;
+  const wy = (cy-offset.y)/scale;
 
-  scale = Math.max(0.25, Math.min(2.5, scale + change));
+  scale = Math.max(0.25,Math.min(2.5,scale+change));
 
-  offset.x = cx - wx * scale;
-  offset.y = cy - wy * scale;
+  offset.x = cx-wx*scale;
+  offset.y = cy-wy*scale;
 
   applyTransform();
 }
@@ -1567,32 +1491,32 @@ function zoomAtCenter(change) {
 $("zoomIn").onclick = () => zoomAtCenter(0.15);
 $("zoomOut").onclick = () => zoomAtCenter(-0.15);
 
-// STAMMBAUM EINPASSEN
+/* Ansicht einpassen */
 
 function fit() {
   if (!people.length) return;
 
-  const minX = Math.min(...people.map(p => p.x));
-  const minY = Math.min(...people.map(p => p.y));
+  const minX = Math.min(...people.map(p=>p.x));
+  const minY = Math.min(...people.map(p=>p.y));
 
-  const maxX = Math.max(...people.map(p => p.x + (p.w || 190)));
-  const maxY = Math.max(...people.map(p => p.y + (p.h || 112)));
+  const maxX = Math.max(...people.map(p=>p.x+(p.w || 190)));
+  const maxY = Math.max(...people.map(p=>p.y+(p.h || 112)));
 
   const rect = canvas.getBoundingClientRect();
 
   scale = Math.min(
     1.2,
-    (rect.width - 100) / (maxX - minX + 100),
-    (rect.height - 100) / (maxY - minY + 100)
+    (rect.width-100)/(maxX-minX+100),
+    (rect.height-100)/(maxY-minY+100)
   );
 
-  scale = Math.max(0.25, scale);
+  scale = Math.max(0.25,scale);
 
   offset.x =
-    (rect.width - (maxX - minX) * scale) / 2 - minX * scale;
+    (rect.width-(maxX-minX)*scale)/2-minX*scale;
 
   offset.y =
-    (rect.height - (maxY - minY) * scale) / 2 - minY * scale;
+    (rect.height-(maxY-minY)*scale)/2-minY*scale;
 
   applyTransform();
 }
@@ -1605,12 +1529,12 @@ $("resetBtn").onclick = () => {
   }
 };
 
-// EXPORT
+/* Export */
 
 $("saveBtn").onclick = () => {
   const blob = new Blob(
-    [JSON.stringify({people, relations, nextId}, null, 2)],
-    {type: "application/json"}
+    [JSON.stringify({people,relations,nextId},null,2)],
+    {type:"application/json"}
   );
 
   const url = URL.createObjectURL(blob);
@@ -1623,7 +1547,7 @@ $("saveBtn").onclick = () => {
   URL.revokeObjectURL(url);
 };
 
-// IMPORT
+/* Import */
 
 $("loadBtn").onclick = () => $("fileInput").click();
 
@@ -1645,19 +1569,17 @@ $("fileInput").onchange = e => {
       }
 
       people = data.people.map(p => ({
-        w: 190,
-        h: 112,
-        ...p
+        w:190,h:112,...p
       }));
-
-      relations = data.relations
-        .map(normalizeRelation)
-        .filter(r => r.members.length >= 2);
 
       nextId = Math.max(
         Number(data.nextId) || 0,
-        ...people.map(p => Number(p.id) || 0)
-      ) + 1;
+        ...people.map(p=>Number(p.id)||0)
+      )+1;
+
+      relations = data.relations
+        .map(normalizeRelation)
+        .filter(r=>r.members.length>=2);
 
       selected = null;
       selectedRelation = null;
@@ -1680,7 +1602,7 @@ $("fileInput").onchange = e => {
 
 $("addBtn").onclick = addPerson;
 
-// GESPEICHERTE DATEN LADEN
+/* Gespeicherte Daten laden */
 
 function loadSaved() {
   try {
@@ -1701,21 +1623,19 @@ function loadSaved() {
     }
 
     people = data.people.map(p => ({
-      w: 190,
-      h: 112,
-      ...p
+      w:190,h:112,...p
     }));
+
+    nextId = Math.max(
+      Number(data.nextId) || 0,
+      ...people.map(p=>Number(p.id)||0)
+    )+1;
 
     relations = Array.isArray(data.relations)
       ? data.relations
           .map(normalizeRelation)
-          .filter(r => r.members.length >= 2)
+          .filter(r=>r.members.length>=2)
       : [];
-
-    nextId = Math.max(
-      Number(data.nextId) || 0,
-      ...people.map(p => Number(p.id) || 0)
-    ) + 1;
 
     selected = null;
     selectedRelation = null;
@@ -1730,12 +1650,11 @@ function loadSaved() {
   }
 }
 
-window.addEventListener("resize", applyTransform);
+window.addEventListener("resize",applyTransform);
 
 loadSaved();
 
 })();
 </script>
-
 </body>
 </html>
