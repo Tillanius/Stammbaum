@@ -45,7 +45,7 @@ hr{border:0;border-top:1px solid var(--border);width:100%}
 .dialog{width:min(420px,100%)}.dialog h2,.photo-header h2{margin:0 0 8px;font-size:23px}.dialog p,.photo-header p{font-size:12px;color:var(--muted)}
 .export-options{display:grid;gap:9px;margin-top:18px}.export-options button{text-align:left;padding:14px}
 .photo-header{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.photo-header p{margin:0 0 18px}
-.photo-upload{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:24px;border:1.5px dashed #a8c4b0;border-radius:16px;background:#f5f9f6;cursor:pointer}
+.photo-upload{display:flex;touch-action:manipulation;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:24px;border:1.5px dashed #a8c4b0;border-radius:16px;background:#f5f9f6;cursor:pointer}
 .photo-upload:hover,.photo-upload.dragover{background:#e9f3ed;border-color:var(--green)}.photo-upload .upload-icon{font-size:30px}.photo-upload strong{font-size:14px;color:#315d43}.photo-upload small{font-size:11px;color:#85858c;line-height:1.5}.photo-upload input{display:none}
 .gallery-heading{display:flex;justify-content:space-between;margin:23px 0 12px}.gallery-heading h3{margin:0;font-size:15px}.photo-count{font-size:11px;color:var(--muted)}
 .photo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:12px}
@@ -85,6 +85,22 @@ hr{border:0;border-top:1px solid var(--border);width:100%}
       <button class="swatch" style="background:#fff" data-tone="white"></button><button class="swatch" style="background:#edf4ee" data-tone="sage"></button><button class="swatch" style="background:#edf2f8" data-tone="blue"></button><button class="swatch" style="background:#f8eeee" data-tone="rose"></button><button class="swatch" style="background:#f6f2e8" data-tone="sand"></button><button class="swatch" style="background:#f1eff8" data-tone="lavender"></button>
     </div></div>
     <hr>
+    <hr>
+    <div class="field">
+      <label for="relationType">Beziehung hinzufügen</label>
+      <select id="relationType" style="width:100%;border:1px solid #d2d2da;border-radius:10px;padding:10px;background:white">
+        <option value="parent">Elternteil von</option>
+        <option value="child">Kind von</option>
+        <option value="partner">Partner/in von</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="relationTarget">Andere Person</label>
+      <select id="relationTarget" style="width:100%;border:1px solid #d2d2da;border-radius:10px;padding:10px;background:white"></select>
+    </div>
+    <button id="addRelationBtn">＋ Beziehung verknüpfen</button>
+    <div class="field"><label>Bestehende Beziehungen</label><div id="relationList" style="font-size:12px;line-height:1.7;color:#555">Noch keine Beziehungen.</div></div>
+    <hr>
     <button class="primary" id="openPhotosBtn">📷 Fotos dieser Person</button>
     <button id="deletePersonBtn">Person löschen</button>
     <div class="status" id="status">Lokal gespeichert.</div>
@@ -108,7 +124,8 @@ hr{border:0;border-top:1px solid var(--border);width:100%}
 "use strict";
 const $ = id => document.getElementById(id);
 const canvas=$("canvas"),world=$("world"),nodes=$("nodes"),links=$("links"),workspace=$("workspace");
-let people=[],selected=null,nextId=1,scale=1,offset={x:0,y:0},drag=null,resizeDrag=null,pan=null;
+let people=[],relations=[],selected=null,nextId=1,scale=1,offset={x:0,y:0},drag=null,resizeDrag=null,pan=null;
+let photoPersonKey=null,lastTap={time:0,id:null};
 let db=null,photoURLs=[];
 const tones=["white","sage","blue","rose","sand","lavender"];
 const examples=[
@@ -122,6 +139,50 @@ function ensureKeys(){people.forEach(p=>{if(!p.photoKey)p.photoKey=key()})}
 function getPerson(id){return people.find(p=>p.id===Number(id))}
 function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function fmt(v){if(!v)return "";if(/^\d{4}$/.test(v))return v;const d=new Date(v+"T12:00:00");return isNaN(d)?v:d.toLocaleDateString("de-DE")}
+function drawRelations(){
+  links.innerHTML="";
+  links.setAttribute("viewBox","0 0 4000 3000");
+  relations.forEach(r=>{
+    const a=getPerson(r.a),b=getPerson(r.b); if(!a||!b)return;
+    const ax=a.x+(a.w||190)/2, ay=a.y+(a.h||112)/2;
+    const bx=b.x+(b.w||190)/2, by=b.y+(b.h||112)/2;
+    const line=document.createElementNS("http://www.w3.org/2000/svg","path");
+    line.setAttribute("d",`M ${ax} ${ay} C ${ax} ${(ay+by)/2}, ${bx} ${(ay+by)/2}, ${bx} ${by}`);
+    line.setAttribute("fill","none"); line.setAttribute("stroke",r.type==="partner"?"#b58a54":"#789b86");
+    line.setAttribute("stroke-width",r.type==="partner"?"3":"2.5");
+    line.setAttribute("stroke-linecap","round"); links.appendChild(line);
+    if(r.type==="partner"){
+      const t=document.createElementNS("http://www.w3.org/2000/svg","text");
+      t.setAttribute("x",(ax+bx)/2);t.setAttribute("y",(ay+by)/2-7);t.setAttribute("text-anchor","middle");
+      t.setAttribute("font-size","17");t.textContent="♥";links.appendChild(t);
+    }
+  });
+}
+function relationLabel(r){
+  const a=getPerson(r.a),b=getPerson(r.b); if(!a||!b)return "";
+  if(r.type==="parent")return `${a.name} ist Elternteil von ${b.name}`;
+  if(r.type==="child")return `${a.name} ist Kind von ${b.name}`;
+  return `${a.name} ist Partner/in von ${b.name}`;
+}
+function renderRelationControls(){
+  const target=$("relationTarget"),list=$("relationList");
+  if(!target||!list)return;
+  target.innerHTML="";
+  people.filter(p=>p.id!==selected).forEach(p=>{
+    const o=document.createElement("option");o.value=p.id;o.textContent=p.name||"Unbenannte Person";target.appendChild(o);
+  });
+  const mine=relations.filter(r=>r.a===selected||r.b===selected);
+  list.innerHTML="";
+  if(!mine.length){list.textContent="Noch keine Beziehungen.";return}
+  mine.forEach(r=>{
+    const row=document.createElement("div");
+    row.style.cssText="display:flex;justify-content:space-between;gap:8px;align-items:center;margin:5px 0";
+    const label=document.createElement("span");label.textContent=relationLabel(r);
+    const del=document.createElement("button");del.textContent="Entfernen";del.style.cssText="padding:4px 7px;font-size:10px";
+    del.addEventListener("click",()=>{relations=relations.filter(x=>x!==r);render();renderRelationControls();persist()});
+    row.append(label,del);list.appendChild(row);
+  });
+}
 function render(){
  nodes.innerHTML="";
  people.forEach(p=>{
@@ -136,10 +197,11 @@ function sync(){
  const p=getPerson(selected);workspace.classList.toggle("has-selection",!!p);
  $("fullName").value=p?.name||"";$("birth").value=p?.birth||"";$("death").value=p?.death||"";
  $("colors").querySelectorAll("[data-tone]").forEach(b=>b.style.outline=b.dataset.tone===p?.tone?"2px solid #34765a":"none");
+  renderRelationControls();
 }
 function select(id){selected=id;render();sync()}
 function persist(){
- try{localStorage.setItem("familienatlas-v3",JSON.stringify({people,nextId}));$("status").textContent="Gespeichert · "+new Date().toLocaleTimeString("de-DE")}
+ try{localStorage.setItem("familienatlas-v3",JSON.stringify({people,relations,nextId}));$("status").textContent="Gespeichert · "+new Date().toLocaleTimeString("de-DE")}
  catch(e){$("status").textContent="Speichern nicht möglich."}
 }
 function addPerson(){
@@ -212,7 +274,7 @@ async function handleFiles(files){
  catch(e){photoMessage("Speichern fehlgeschlagen: "+e.message,true)}
 }
 function closePhotos(){$("photoOverlay").classList.remove("open");clearPhotoURLs();photoPersonKey=null;$("photoFileInput").value=""}
-function example(){people=examples.map(p=>({...p,photoKey:key()}));nextId=5;selected=null;render();sync();fit();persist()}
+function example(){people=examples.map(p=>({...p,photoKey:key()}));relations=[];nextId=5;selected=null;render();sync();fit();persist()}
 $("addBtn").onclick=addPerson;
 $("fullName").oninput=e=>{const p=getPerson(selected);if(p){p.name=e.target.value;render();persist();if($("photoOverlay").classList.contains("open"))$("photoTitle").textContent="Fotos – "+(p.name||"Unbenannte Person")}};
 $("birth").onchange=e=>{const p=getPerson(selected);if(p){p.birth=e.target.value;render();persist()}};
@@ -224,6 +286,15 @@ $("deletePersonBtn").onclick=async()=>{
  people=people.filter(x=>x.id!==selected);selected=null;render();sync();persist()
 };
 $("openPhotosBtn").onclick=()=>selected!==null&&showPhotos(selected);
+$("addRelationBtn").onclick=()=>{
+  if(selected===null){alert("Bitte zuerst eine Person auswählen.");return}
+  const target=Number($("relationTarget").value),type=$("relationType").value;
+  if(!target||target===selected){alert("Bitte eine andere Person auswählen.");return}
+  const exists=relations.some(r=>r.a===selected&&r.b===target&&r.type===type);
+  if(exists){alert("Diese Beziehung besteht bereits.");return}
+  relations.push({a:selected,b:target,type});
+  render();renderRelationControls();persist();
+};
 $("closePhotoBtn").onclick=closePhotos;
 $("photoOverlay").addEventListener("click",e=>{if(e.target===$("photoOverlay"))closePhotos()});
 $("photoFileInput").addEventListener("change",e=>{handleFiles(e.target.files);e.target.value=""});
@@ -239,11 +310,11 @@ $("resetBtn").onclick=()=>{if(confirm("Beispiel-Stammbaum wiederherstellen?"))ex
 $("saveBtn").onclick=()=>$("exportOverlay").classList.add("open");$("closeExportBtn").onclick=()=>$("exportOverlay").classList.remove("open");
 $("exportOverlay").addEventListener("click",e=>{if(e.target===$("exportOverlay"))$("exportOverlay").classList.remove("open")});
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
-$("exportJsonBtn").onclick=()=>{ensureKeys();download(new Blob([JSON.stringify({people,nextId},null,2)],{type:"application/json"}),"mein-stammbaum.json");$("exportOverlay").classList.remove("open")};
+$("exportJsonBtn").onclick=()=>{ensureKeys();download(new Blob([JSON.stringify({people,relations,nextId},null,2)],{type:"application/json"}),"mein-stammbaum.json");$("exportOverlay").classList.remove("open")};
 $("loadBtn").onclick=()=>$("fileInput").click();
 $("fileInput").onchange=e=>{
  const f=e.target.files[0];if(!f)return;const reader=new FileReader();
- reader.onload=()=>{try{const d=JSON.parse(reader.result);if(!Array.isArray(d.people))throw Error();people=d.people.map(p=>({w:190,h:112,...p}));ensureKeys();nextId=Math.max(Number(d.nextId)||0,...people.map(p=>Number(p.id)||0))+1;selected=null;render();sync();fit();persist()}catch(err){alert("Die Datei konnte nicht gelesen werden.")}e.target.value=""};reader.readAsText(f)
+ reader.onload=()=>{try{const d=JSON.parse(reader.result);if(!Array.isArray(d.people))throw Error();people=d.people.map(p=>({w:190,h:112,...p}));relations=Array.isArray(d.relations)?d.relations:[];ensureKeys();nextId=Math.max(Number(d.nextId)||0,...people.map(p=>Number(p.id)||0))+1;selected=null;render();sync();fit();persist()}catch(err){alert("Die Datei konnte nicht gelesen werden.")}e.target.value=""};reader.readAsText(f)
 };
 function exportImage(type){
  if(!window.html2canvas){alert("Für JPG/PDF bitte html2canvas laden. Verwende alternativ den JSON-Export.");return}
@@ -279,11 +350,12 @@ canvas.addEventListener("pointermove",e=>{
 });
 function finish(){if(drag||resizeDrag)persist();drag=null;resizeDrag=null;pan=null}
 canvas.addEventListener("pointerup",finish);canvas.addEventListener("pointercancel",finish);
+canvas.addEventListener("lostpointercapture",finish);
 nodes.addEventListener("dblclick",e=>{const card=e.target.closest(".person");if(card){e.preventDefault();e.stopPropagation();showPhotos(Number(card.dataset.id))}});
 canvas.addEventListener("wheel",e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();zoomAt(e.deltaY<0?.08:-.08)},{passive:false});
 canvas.addEventListener("click",e=>{if(e.target===canvas||e.target===world||e.target===links||e.target===nodes){selected=null;render();sync()}});
 function load(){
- try{const raw=localStorage.getItem("familienatlas-v3")||localStorage.getItem("familienatlas-v2");if(raw){const d=JSON.parse(raw);if(Array.isArray(d.people)){people=d.people.map(p=>({w:190,h:112,...p}));ensureKeys();nextId=Math.max(Number(d.nextId)||0,...people.map(p=>Number(p.id)||0))+1;render();sync();fit();return}}}catch(e){}
+ try{const raw=localStorage.getItem("familienatlas-v3")||localStorage.getItem("familienatlas-v2");if(raw){const d=JSON.parse(raw);if(Array.isArray(d.people)){people=d.people.map(p=>({w:190,h:112,...p}));relations=Array.isArray(d.relations)?d.relations:[];ensureKeys();nextId=Math.max(Number(d.nextId)||0,...people.map(p=>Number(p.id)||0))+1;render();sync();fit();return}}}catch(e){}
  example()
 }
 window.addEventListener("resize",applyTransform);
