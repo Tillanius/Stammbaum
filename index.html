@@ -1,223 +1,1378 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Familienatlas – Stammbaum</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#f5f6f2">
+<title>Familienatlas – Mein Stammbaum</title>
+
 <style>
-:root{--site-primary:#355c50;--site-secondary:#e9eee8;--site-background:#f5f6f2;--site-on-primary:#fff;--site-on-secondary:#263b34;--site-on-background:#26342e;--site-font-body:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--site-font-heading:Georgia,serif;--site-heading-scale:1;--site-spacing-scale:1;--site-radius-scale:1;--site-decoration-opacity:1}
-*{box-sizing:border-box}body{margin:0;font-family:var(--site-font-body);color:var(--site-on-background);background:var(--site-background)}
-#app{min-height:100vh;background-color:var(--site-background);color:var(--site-on-background);display:flex;flex-direction:column}
-header{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid #dfe4dd;background:#fff;gap:18px}
-.brand{display:flex;align-items:center;gap:12px}.mark{width:38px;height:38px;border-radius:12px;background:var(--site-primary);color:white;display:grid;place-items:center;font-size:20px}.brand strong{font-family:var(--site-font-heading);font-size:22px;font-weight:600}.brand small{display:block;color:#758078;font-size:11px;letter-spacing:.13em;text-transform:uppercase;margin-top:2px}
-.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}button{font:inherit;border:1px solid #d8dfd7;background:#fff;color:#304139;border-radius:10px;padding:9px 13px;cursor:pointer;font-size:13px;font-weight:600}button:hover{background:#f0f4ef}button.primary{background:var(--site-primary);color:white;border-color:var(--site-primary)}button.primary:hover{filter:brightness(1.08)}button.active{background:#e4eee7;border-color:#9eb6a7;color:#244b3b}
-.workspace{display:grid;grid-template-columns:minmax(0,1fr) 300px;min-height:calc(100vh - 72px);flex:1}
-.canvas-wrap{position:relative;overflow:hidden;min-height:680px;background-color:#f8f9f6;background-image:radial-gradient(#d8ded7 0.8px,transparent .8px);background-size:22px 22px;touch-action:none;overscroll-behavior:contain;-webkit-user-select:none;user-select:none}
-#world{position:absolute;inset:0;transform-origin:0 0}
-#links{position:absolute;inset:0;width:3000px;height:2000px;overflow:visible;pointer-events:none}
-.person{position:absolute;width:190px;min-height:112px;border:1.5px solid #cbd4cc;border-radius:13px;padding:15px 15px 13px;background:#fff;box-shadow:0 5px 18px #25382b12;cursor:grab;user-select:none;transition:box-shadow .12s,border-color .12s}
-.person{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}.person:active{cursor:grabbing}.person.selected{outline:2px solid var(--site-primary);outline-offset:2px;box-shadow:0 8px 25px #25382b24}.person .name{font-family:var(--site-font-heading);font-size:19px;line-height:1.2;font-weight:600;color:#263b32;margin-bottom:9px;overflow-wrap:anywhere}.person .dates{font-size:12px;color:#647168;line-height:1.55}.person .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;background:var(--dot,#6e9b82)}
-.person[data-tone="sage"]{background:#e8f0e8}.person[data-tone="blue"]{background:#e8eef5}.person[data-tone="rose"]{background:#f5e9e7}.person[data-tone="sand"]{background:#f4efdf}.person[data-tone="lavender"]{background:#efebf6}.person[data-tone="white"]{background:#fff}
-.person[data-tone="sage"] .dot{--dot:#668b70}.person[data-tone="blue"] .dot{--dot:#6d8eae}.person[data-tone="rose"] .dot{--dot:#b77c78}.person[data-tone="sand"] .dot{--dot:#b39a57}.person[data-tone="lavender"] .dot{--dot:#8c7cab}
-.person.connect-target{outline:2px dashed #b17a39;outline-offset:3px}
-#emptyHint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;color:#87928a;pointer-events:none;display:none}
-#emptyHint b{display:block;color:#52645a;margin-bottom:7px}
-.sidebar{background:#fff;border-left:1px solid #e0e5df;padding:22px 18px;display:flex;flex-direction:column;gap:19px}
-.panel-title{font-family:var(--site-font-heading);font-size:20px;margin:0}.muted{color:#7b867e;font-size:12px;line-height:1.5;margin-top:-12px}
-.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#778279}.field input,.field select{width:100%;border:1px solid #dce3dc;border-radius:9px;padding:10px 11px;font:inherit;font-size:13px;background:#fff;color:#2b3b32}.field input:focus,.field select:focus{outline:2px solid #b8cbbd;border-color:#799987}
-.field select[multiple]{min-height:125px;padding:7px}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.colors{display:flex;gap:8px;flex-wrap:wrap}.swatch{width:28px;height:28px;border-radius:9px;border:2px solid #fff;box-shadow:0 0 0 1px #ccd5cc;cursor:pointer}.swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--site-primary)}
-hr{border:0;border-top:1px solid #edf0ec;width:100%;margin:0}.side-actions{display:flex;gap:8px}.side-actions button{flex:1}.tip{background:#f2f5f0;border-radius:11px;padding:12px;font-size:12px;line-height:1.5;color:#617066}
-.canvas-tools{position:absolute;z-index:5;left:18px;top:18px;display:flex;gap:7px;background:#fff;padding:6px;border:1px solid #e0e5df;border-radius:12px;box-shadow:0 3px 12px #20332610}
-.canvas-tools button{padding:8px 10px}.zoom{position:absolute;right:18px;bottom:18px;z-index:5;display:flex;gap:5px;background:white;border:1px solid #e0e5df;border-radius:11px;padding:5px}.zoom button{padding:7px 10px}
-.status{font-size:11px;color:#7c877f;margin-top:auto}
-@media(max-width:850px){.workspace{grid-template-columns:1fr}.sidebar{border-left:0;border-top:1px solid #e0e5df;display:grid;grid-template-columns:1fr 1fr}.sidebar .panel-title,.sidebar .muted,.tip,.status{grid-column:1/-1}.canvas-wrap{min-height:620px}header{height:auto;min-height:72px;padding:12px 15px;align-items:flex-start;flex-direction:column}.actions{width:100%}}
-@media(max-width:520px){.sidebar{display:flex}.actions button{font-size:12px;padding:8px}.person{width:166px}.canvas-wrap{min-height:560px}}
+:root {
+  --green: #355c50;
+  --background: #f5f6f2;
+  --border: #dce3dc;
+  --text: #26342e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  color: var(--text);
+  background: var(--background);
+  overflow: hidden;
+}
+
+button, input { font: inherit; }
+
+button {
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: white;
+  color: #304139;
+  border-radius: 9px;
+  padding: 9px 13px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+button:hover { background: #f0f4ef; }
+
+button.primary {
+  background: var(--green);
+  color: white;
+  border-color: var(--green);
+}
+
+header {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  position: relative;
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--green);
+  color: white;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+}
+
+.brand strong {
+  font-family: Georgia, serif;
+  font-size: 22px;
+}
+
+.brand small {
+  display: block;
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: #77847b;
+  text-transform: uppercase;
+}
+
+.actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  height: calc(100dvh - 70px);
+}
+
+.workspace:not(.has-selection) {
+  grid-template-columns: 1fr;
+}
+
+.workspace:not(.has-selection) .sidebar {
+  display: none;
+}
+
+/* ZEICHENFLÄCHE */
+
+.canvas {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  background-color: #f8f9f6;
+  background-image: radial-gradient(#d8ded7 .8px, transparent .8px);
+  background-size: 22px 22px;
+  touch-action: none;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.world {
+  position: absolute;
+  width: 4000px;
+  height: 3000px;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+#links {
+  position: absolute;
+  width: 4000px;
+  height: 3000px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+#nodes {
+  position: absolute;
+  inset: 0;
+}
+
+/* PERSONENKÄSTEN */
+
+.person {
+  position: absolute;
+  width: 190px;
+  height: 112px;
+  min-width: 150px;
+  min-height: 100px;
+  padding: 15px;
+  border: 1.5px solid #cbd4cc;
+  border-radius: 13px;
+  box-shadow: 0 5px 18px #25382b12;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: visible;
+}
+
+.person.selected {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+.person .name {
+  font-family: Georgia, serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: #263b32;
+  margin-bottom: 9px;
+  overflow-wrap: anywhere;
+}
+
+.person .dates {
+  font-size: 12px;
+  color: #647168;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.person .dot {
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.person[data-tone="white"] { background: white; }
+.person[data-tone="sage"] { background: #e8f0e8; }
+.person[data-tone="blue"] { background: #e8eef5; }
+.person[data-tone="rose"] { background: #f5e9e7; }
+.person[data-tone="sand"] { background: #f4efdf; }
+.person[data-tone="lavender"] { background: #efebf6; }
+
+.person[data-tone="white"] .dot { background: #9ba79e; }
+.person[data-tone="sage"] .dot { background: #668b70; }
+.person[data-tone="blue"] .dot { background: #6d8eae; }
+.person[data-tone="rose"] .dot { background: #b77c78; }
+.person[data-tone="sand"] .dot { background: #b39a57; }
+.person[data-tone="lavender"] .dot { background: #8c7cab; }
+
+/* GRÖSSENÄNDERUNG */
+
+.resize-handle {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  right: 2px;
+  bottom: 2px;
+  border-radius: 5px;
+  cursor: nwse-resize;
+  touch-action: none;
+  background:
+    linear-gradient(135deg, transparent 45%, #789083 46%, #789083 55%, transparent 56%),
+    linear-gradient(135deg, transparent 65%, #789083 66%, #789083 75%, transparent 76%);
+}
+
+/* SIDEBAR */
+
+.sidebar {
+  background: white;
+  border-left: 1px solid var(--border);
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  overflow-y: auto;
+}
+
+.panel-title {
+  font-family: Georgia, serif;
+  font-size: 21px;
+  margin: 0;
+}
+
+.muted {
+  color: #7b867e;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: -12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #778279;
+}
+
+.field input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px;
+  font-size: 13px;
+  background: white;
+}
+
+.field input:focus {
+  outline: 2px solid #9eb6a7;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.colors {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.swatch {
+  width: 29px;
+  height: 29px;
+  border-radius: 8px;
+  padding: 0;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #ccd5cc;
+}
+
+.swatch[aria-pressed="true"] {
+  box-shadow: 0 0 0 2px var(--green);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #edf0ec;
+  width: 100%;
+}
+
+.side-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.side-actions button { flex: 1; }
+
+.tip {
+  background: #f2f5f0;
+  border-radius: 11px;
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #617066;
+}
+
+.status {
+  font-size: 11px;
+  color: #7c877f;
+  margin-top: auto;
+}
+
+/* BEDIENELEMENTE */
+
+.canvas-tools {
+  position: absolute;
+  z-index: 5;
+  left: 15px;
+  top: 15px;
+  display: flex;
+  gap: 6px;
+  background: white;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+}
+
+.zoom {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  z-index: 5;
+  display: flex;
+  gap: 5px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 5px;
+}
+
+.empty-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #87928a;
+  text-align: center;
+  pointer-events: none;
+  display: none;
+}
+
+.empty-hint strong {
+  display: block;
+  color: #52645a;
+  margin-bottom: 7px;
+}
+
+@media(max-width:850px) {
+  header {
+    height: auto;
+    min-height: 70px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .workspace {
+    height: calc(100dvh - 125px);
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: absolute;
+    z-index: 8;
+    right: 0;
+    top: 125px;
+    bottom: 0;
+    width: min(340px, 90vw);
+    border-left: 1px solid var(--border);
+    box-shadow: -5px 0 20px #00000012;
+  }
+
+  .workspace.has-selection .canvas {
+    width: 100%;
+  }
+}
+
+@media(max-width:520px) {
+  .actions button {
+    font-size: 11px;
+    padding: 8px;
+  }
+
+  .brand strong { font-size: 19px; }
+}
 </style>
 </head>
+
 <body>
-<div id="app">
+
 <header>
- <div class="brand"><div class="mark">⌘</div><div><strong>Familienatlas</strong><small>Dein Stammbaum, frei gestaltet</small></div></div>
- <div class="actions">
-  <button class="primary" id="addBtn">＋ Person hinzufügen</button>
-  <button id="connectBtn">↗ Beziehung zeichnen</button>
-  <button id="saveBtn">↓ Stammbaum exportieren</button>
-  <button id="loadBtn">↑ Importieren</button><input type="file" id="fileInput" accept="application/json" hidden>
- </div>
-</header>
-<div class="workspace">
- <main class="canvas-wrap" id="canvas">
-  <div class="canvas-tools"><button id="fitBtn" title="Ansicht zentrieren">⌖ Ansicht</button><button id="clearBtn" title="Beispiel wiederherstellen">↺ Beispiel</button></div>
-  <div id="world"><svg id="links"></svg><div id="nodes"></div></div>
-  <div id="emptyHint"><b>Deine Familiengeschichte beginnt hier</b>Füge eine Person hinzu, um loszulegen.</div>
-  <div class="zoom"><button id="zoomOut">−</button><button id="zoomLabel">100%</button><button id="zoomIn">＋</button></div>
- </main>
- <aside class="sidebar">
-  <h2 class="panel-title">Person bearbeiten</h2>
-  <p class="muted">Wähle einen Kasten aus, um Angaben und Farbe anzupassen.</p>
-  <div class="field"><label for="fullName">Name</label><input id="fullName" placeholder="z. B. Maria Müller"></div>
-  <div class="form-grid">
-   <div class="field"><label for="birth">Geboren (Datum oder Jahr)</label><input id="birth" type="text" placeholder="z. B. 1960"></div>
-   <div class="field"><label for="death">Gestorben</label><input id="death" type="text" placeholder="optional"></div>
+  <div class="brand">
+    <div class="brand-icon">⌘</div>
+    <div>
+      <strong>Familienatlas</strong>
+      <small>Dein Stammbaum, frei gestaltet</small>
+    </div>
   </div>
-  <div class="field"><label>Kastenfarbe</label><div class="colors" id="colors">
-   <button class="swatch" style="background:#fff" data-tone="white" aria-label="Weiß"></button><button class="swatch" style="background:#e8f0e8" data-tone="sage" aria-label="Salbei"></button><button class="swatch" style="background:#e8eef5" data-tone="blue" aria-label="Blau"></button><button class="swatch" style="background:#f5e9e7" data-tone="rose" aria-label="Rosé"></button><button class="swatch" style="background:#f4efdf" data-tone="sand" aria-label="Sand"></button><button class="swatch" style="background:#efebf6" data-tone="lavender" aria-label="Lavendel"></button>
-  </div></div>
-  <hr>
-  <h2 class="panel-title">Beziehung</h2>
-  <p class="muted" id="relationHelp">Verbinde zwei oder mehrere Personen und gib der Verbindung eine Bezeichnung.</p>
-  <div class="field"><label for="relationName">Bezeichnung der Verbindung</label><input id="relationName" placeholder="z. B. Eltern von"></div>
-  <div class="field"><label for="relationPeople">Mehrere Personen verbinden</label><select id="relationPeople" multiple size="5" aria-label="Personen für eine gemeinsame Beziehung auswählen"></select></div>
-  <button id="createGroupRelationBtn" type="button">＋ Ausgewählte Personen verbinden</button>
-  <div class="side-actions"><button id="deleteRelationBtn">Linie löschen</button><button id="deletePersonBtn">Person löschen</button></div>
-  <div class="tip" id="tip">Tipp: Ziehe die Kästen mit der Maus an die gewünschte Stelle. Auf Touchscreens funktioniert das Ziehen ebenfalls.</div>
-  <div class="status" id="status">Änderungen werden lokal in diesem Browser gespeichert.</div>
- </aside>
+
+  <div class="actions">
+    <button class="primary" id="addBtn">＋ Person</button>
+    <button id="saveBtn">↓ Exportieren</button>
+    <button id="loadBtn">↑ Importieren</button>
+    <input type="file" id="fileInput" accept=".json" hidden>
+  </div>
+</header>
+
+<div class="workspace" id="workspace">
+
+  <main class="canvas" id="canvas">
+
+    <div class="canvas-tools">
+      <button id="fitBtn">⌖ Ansicht</button>
+      <button id="resetBtn">↺ Beispiel</button>
+    </div>
+
+    <div class="world" id="world">
+      <svg id="links"></svg>
+      <div id="nodes"></div>
+    </div>
+
+    <div class="empty-hint" id="emptyHint">
+      <strong>Deine Familiengeschichte beginnt hier</strong>
+      Füge deine erste Person hinzu.
+    </div>
+
+    <div class="zoom">
+      <button id="zoomOut">−</button>
+      <button id="zoomLabel">100%</button>
+      <button id="zoomIn">＋</button>
+    </div>
+
+  </main>
+
+  <aside class="sidebar">
+
+    <h2 class="panel-title">Person bearbeiten</h2>
+
+    <p class="muted">
+      Hier kannst du die ausgewählte Person bearbeiten.
+    </p>
+
+    <div class="field">
+      <label for="fullName">Name</label>
+      <input id="fullName" placeholder="Vor- und Nachname">
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="birth">Geboren</label>
+        <input id="birth" placeholder="z. B. 1960">
+      </div>
+
+      <div class="field">
+        <label for="death">Gestorben</label>
+        <input id="death" placeholder="optional">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Kastenfarbe</label>
+      <div class="colors" id="colors">
+        <button class="swatch" style="background:#fff" data-tone="white"></button>
+        <button class="swatch" style="background:#e8f0e8" data-tone="sage"></button>
+        <button class="swatch" style="background:#e8eef5" data-tone="blue"></button>
+        <button class="swatch" style="background:#f5e9e7" data-tone="rose"></button>
+        <button class="swatch" style="background:#f4efdf" data-tone="sand"></button>
+        <button class="swatch" style="background:#efebf6" data-tone="lavender"></button>
+      </div>
+    </div>
+
+    <hr>
+
+    <h2 class="panel-title">Beziehungen</h2>
+
+    <p class="muted">
+      Du kannst die Beschriftung einer ausgewählten Verbindung ändern.
+    </p>
+
+    <div class="field">
+      <label for="relationName">Bezeichnung</label>
+      <input id="relationName" placeholder="z. B. Mutter von">
+    </div>
+
+    <div class="side-actions">
+      <button id="deleteRelationBtn">Linie löschen</button>
+      <button id="deletePersonBtn">Person löschen</button>
+    </div>
+
+    <div class="tip" id="tip">
+      Apple Pencil: Ziehe von einer Person zur anderen, um eine Beziehung zu zeichnen.
+      Ein Finger bewegt Kästen. Zwei Finger zoomen und verschieben.
+    </div>
+
+    <div class="status" id="status">
+      Lokal gespeichert.
+    </div>
+
+  </aside>
 </div>
-</div>
+
 <script>
-(()=>{
-const $=id=>document.getElementById(id);
-const tones=["white","sage","blue","rose","sand","lavender"];
-let people=[], relations=[], selected=null, selectedRelation=null, connectMode=false, connectFirst=null, scale=1, offset={x:0,y:0}, drag=null, relationDrag=null, suppressClick=false, nextId=1;
-const seed=[
- {id:1,name:"Mutter",birth:"1960",death:"",tone:"sage",x:370,y:105},
- {id:2,name:"Vater",birth:"1963",death:"",tone:"blue",x:690,y:85},
- {id:3,name:"Sohn",birth:"1986",death:"",tone:"sand",x:150,y:425},
- {id:4,name:"Tochter",birth:"1982",death:"",tone:"rose",x:610,y:425}
+(() => {
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+const workspace = $("workspace");
+const canvas = $("canvas");
+const world = $("world");
+const nodes = $("nodes");
+const links = $("links");
+
+let people = [];
+let relations = [];
+
+let selected = null;
+let selectedRelation = null;
+let nextId = 1;
+
+let scale = 1;
+let offset = {x:0, y:0};
+
+let drag = null;
+let resizeDrag = null;
+let relationDrag = null;
+
+let touchPoints = new Map();
+let pinch = null;
+let suppressClick = false;
+
+const colors = [
+  "white", "sage", "blue",
+  "rose", "sand", "lavender"
 ];
-const seedRelations=[
- {id:1,from:1,to:3,label:"Mutter von"},
- {id:2,from:2,to:3,label:"Vater von"},
- {id:3,from:1,to:4,label:"Mutter von"},
- {id:4,from:2,to:4,label:"Vater von"}
+
+const examplePeople = [
+  {id:1,name:"Mutter",birth:"1960",death:"",tone:"sage",x:370,y:120,w:190,h:112},
+  {id:2,name:"Vater",birth:"1963",death:"",tone:"blue",x:700,y:120,w:190,h:112},
+  {id:3,name:"Sohn",birth:"1986",death:"",tone:"sand",x:180,y:440,w:190,h:112},
+  {id:4,name:"Tochter",birth:"1982",death:"",tone:"rose",x:700,y:440,w:190,h:112}
 ];
-function init(){people=seed.map(p=>({...p}));relations=seedRelations.map(r=>({...r}));nextId=5;selected=null;selectedRelation=null;render();fit();syncPanel();}
-function render(){
- const nodes=$("nodes");nodes.innerHTML="";
- people.forEach(p=>{
-  const el=document.createElement("div");el.className="person"+(selected===p.id?" selected":"")+(connectFirst===p.id?" connect-target":"");el.dataset.id=p.id;el.style.left=p.x+"px";el.style.top=p.y+"px";el.dataset.tone=p.tone||"white";
-  el.innerHTML=`<div class="name"><span class="dot"></span>${escapeHtml(p.name||"Unbenannte Person")}</div><div class="dates">${p.birth?escapeHtml(p.birth):""}${p.death?(p.birth?" · ":"")+("† "+escapeHtml(p.death)):""}</div>`;
-  el.addEventListener("pointerdown",e=>startDrag(e,p.id));
-  el.addEventListener("click",e=>{if(suppressClick){e.preventDefault();return;}if(connectMode&&e.pointerType!=="pen"){chooseConnection(p.id);return;}selected=p.id;selectedRelation=null;syncPanel();render();});
-  nodes.appendChild(el);
- });
- drawLinks();updateRelationPeople();$("emptyHint").style.display=people.length?"none":"block";
- $("world").style.transform=`translate(${offset.x}px,${offset.y}px) scale(${scale})`;
+
+function example() {
+  people = examplePeople.map(p => ({...p}));
+
+  relations = [
+    {id:1,from:1,to:3,label:"Elternteil von"},
+    {id:2,from:2,to:4,label:"Elternteil von"}
+  ];
+
+  nextId = 5;
+  selected = null;
+  selectedRelation = null;
+
+  render();
+  syncPanel();
+  fit();
+  persist();
 }
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function drawLinks(){
- const svg=$("links");svg.innerHTML="";
- relations.forEach(r=>{
-  const ids=Array.isArray(r.people)?r.people:[r.from,r.to];
-  const members=ids.map(id=>people.find(p=>p.id===id)).filter(Boolean);
-  if(members.length<2)return;
-  const selectedStroke=selectedRelation===r.id?"#b17a39":"#8da094";
-  const centers=members.map(p=>({x:p.x+95,y:p.y+56}));
-  if(centers.length===2){
-   const a=members[0],b=members[1],x1=a.x+95,y1=a.y+112,x2=b.x+95,y2=b.y,mid=(y1+y2)/2;
-   const path=document.createElementNS("http://www.w3.org/2000/svg","path");
-   path.setAttribute("d",`M ${x1} ${y1} C ${x1} ${mid}, ${x2} ${mid}, ${x2} ${y2}`);
-   path.setAttribute("fill","none");path.setAttribute("stroke",selectedStroke);path.setAttribute("stroke-width",selectedRelation===r.id?"3":"2");path.setAttribute("stroke-linecap","round");path.style.pointerEvents="stroke";path.style.cursor="pointer";
-   path.addEventListener("click",e=>{e.stopPropagation();selectedRelation=r.id;selected=null;syncPanel();drawLinks();});
-   svg.appendChild(path);
-   const text=document.createElementNS("http://www.w3.org/2000/svg","text");text.setAttribute("x",(x1+x2)/2);text.setAttribute("y",mid-8);text.setAttribute("text-anchor","middle");text.setAttribute("font-size","12");text.setAttribute("font-family","system-ui");text.setAttribute("fill","#61766a");text.textContent=r.label;svg.appendChild(text);
-  }else{
-   const cx=centers.reduce((sum,p)=>sum+p.x,0)/centers.length;
-   const cy=centers.reduce((sum,p)=>sum+p.y,0)/centers.length;
-   centers.forEach(point=>{
-    const path=document.createElementNS("http://www.w3.org/2000/svg","path");
-    path.setAttribute("d",`M ${point.x} ${point.y} L ${cx} ${cy}`);
-    path.setAttribute("fill","none");path.setAttribute("stroke",selectedStroke);path.setAttribute("stroke-width",selectedRelation===r.id?"3":"2");path.setAttribute("stroke-linecap","round");path.style.pointerEvents="stroke";path.style.cursor="pointer";
-    path.addEventListener("click",e=>{e.stopPropagation();selectedRelation=r.id;selected=null;syncPanel();drawLinks();});
-    svg.appendChild(path);
-   });
-   const text=document.createElementNS("http://www.w3.org/2000/svg","text");text.setAttribute("x",cx);text.setAttribute("y",cy-10);text.setAttribute("text-anchor","middle");text.setAttribute("font-size","12");text.setAttribute("font-family","system-ui");text.setAttribute("fill","#61766a");text.textContent=r.label;svg.appendChild(text);
-  }
- });
+
+function fmt(value) {
+  if (!value) return "";
+  if (/^\d{4}$/.test(value)) return value;
+
+  const d = new Date(value + "T12:00:00");
+  if (isNaN(d)) return value;
+
+  return d.toLocaleDateString("de-DE");
 }
-function updateRelationPeople(){
- const select=$("relationPeople");if(!select)return;
- const previous=Array.from(select.selectedOptions).map(o=>Number(o.value));
- select.innerHTML="";
- people.forEach(p=>{const option=document.createElement("option");option.value=p.id;option.textContent=p.name||"Unbenannte Person";option.selected=previous.includes(p.id);select.appendChild(option);});
+
+function esc(value) {
+  return String(value || "").replace(
+    /[&<>"']/g,
+    char => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[char])
+  );
 }
-function startDrag(e,id){
- if(e.cancelable)e.preventDefault();
- const p=people.find(x=>x.id===id);if(!p)return;
- if(connectMode && e.pointerType==="pen"){
-  relationDrag={from:id,pointerId:e.pointerId,x:e.clientX,y:e.clientY};
-  e.currentTarget.setPointerCapture(e.pointerId);suppressClick=true;return;
- }
- if(connectMode)return;
- selected=id;selectedRelation=null;syncPanel();render();
- drag={id,startX:e.clientX,startY:e.clientY,origX:p.x,origY:p.y};
- const el=$("nodes").querySelector(`[data-id="${id}"]`);if(el&&el.setPointerCapture)el.setPointerCapture(e.pointerId);
-}
-$("nodes").addEventListener("pointermove",e=>{
- if(relationDrag){
-  relationDrag.x=e.clientX;relationDrag.y=e.clientY;
-  const a=people.find(p=>p.id===relationDrag.from);
-  const rect=$("world").getBoundingClientRect();
-  const x1=(a.x+95),y1=(a.y+56);
-  const x2=(e.clientX-rect.left)/scale,y2=(e.clientY-rect.top)/scale;
+
+function render() {
+  nodes.innerHTML = "";
+
+  people.forEach(p => {
+    const el = document.createElement("div");
+
+    el.className = "person";
+    if (selected === p.id) el.classList.add("selected");
+
+    el.dataset.id = p.id;
+    el.dataset.tone = colors.includes(p.tone) ? p.tone : "white";
+
+    el.style.left = p.x + "px";
+    el.style.top = p.y + "px";
+    el.style.width = (p.w || 190) + "px";
+    el.style.height = (p.h || 112) + "px";
+
+    el.innerHTML = `
+      <div class="name">
+        <span class="dot"></span>
+        ${esc(p.name || "Unbenannte Person")}
+      </div>
+      <div class="dates">
+        ${p.birth ? "✳ " + fmt(p.birth) : "Geburtsdatum unbekannt"}
+        ${p.death ? "<br>✝ " + fmt(p.death) : ""}
+      </div>
+      <div class="resize-handle"></div>
+    `;
+
+    nodes.appendChild(el);
+  });
+
   drawLinks();
-  const temp=document.createElementNS("http://www.w3.org/2000/svg","path");
-  temp.setAttribute("d",`M ${x1} ${y1} L ${x2} ${y2}`);temp.setAttribute("stroke","#b17a39");temp.setAttribute("stroke-width","3");temp.setAttribute("stroke-dasharray","7 5");temp.setAttribute("fill","none");$("links").appendChild(temp);
-  return;
- }
- if(!drag)return;
- const p=people.find(x=>x.id===drag.id);if(!p)return;
- p.x=Math.max(0,drag.origX+(e.clientX-drag.startX)/scale);p.y=Math.max(0,drag.origY+(e.clientY-drag.startY)/scale);
- const el=$("nodes").querySelector(`[data-id="${p.id}"]`);if(el){el.style.left=p.x+"px";el.style.top=p.y+"px";}drawLinks();
-});
-function finishRelationDrag(e){
- if(!relationDrag)return;
- const from=relationDrag.from;relationDrag=null;
- const hit=document.elementFromPoint(e.clientX,e.clientY);
- const target=hit&&hit.closest?hit.closest(".person"):null;
- if(target&&Number(target.dataset.id)!==from){
-  const to=Number(target.dataset.id),label=prompt("Wie soll diese Beziehung heißen?","Verwandt mit");
-  if(label!==null){relations.push({id:Date.now(),from,to,label:label.trim()||"Verbunden mit"});selectedRelation=relations[relations.length-1].id;selected=null;syncPanel();persist();}
- }
- drawLinks();render();setTimeout(()=>{suppressClick=false;},80);
+  $("emptyHint").style.display = people.length ? "none" : "block";
 }
-$("nodes").addEventListener("pointerup",e=>{
- if(relationDrag){finishRelationDrag(e);return;}
- if(drag){drag=null;persist();}
+
+function drawLinks() {
+  links.innerHTML = "";
+
+  relations.forEach(r => {
+    const a = people.find(p => p.id === r.from);
+    const b = people.find(p => p.id === r.to);
+
+    if (!a || !b) return;
+
+    const x1 = a.x + (a.w || 190) / 2;
+    const y1 = a.y + (a.h || 112);
+    const x2 = b.x + (b.w || 190) / 2;
+    const y2 = b.y;
+    const mid = (y1 + y2) / 2;
+
+    const path = document.createElementNS(
+      "http://www.w3.org/2000/svg", "path"
+    );
+
+    path.setAttribute(
+      "d",
+      `M ${x1} ${y1} C ${x1} ${mid}, ${x2} ${mid}, ${x2} ${y2}`
+    );
+
+    path.setAttribute("fill", "none");
+    path.setAttribute(
+      "stroke",
+      selectedRelation === r.id ? "#b17a39" : "#8da094"
+    );
+    path.setAttribute("stroke-width", "2.5");
+    path.setAttribute("stroke-linecap", "round");
+    path.style.pointerEvents = "stroke";
+    path.style.cursor = "pointer";
+
+    path.addEventListener("click", e => {
+      e.stopPropagation();
+      selectedRelation = r.id;
+      selected = null;
+      syncPanel();
+      render();
+    });
+
+    links.appendChild(path);
+
+    const text = document.createElementNS(
+      "http://www.w3.org/2000/svg", "text"
+    );
+
+    text.setAttribute("x", (x1+x2)/2);
+    text.setAttribute("y", mid-8);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("font-size", "12");
+    text.setAttribute("font-family", "system-ui");
+    text.setAttribute("fill", "#61766a");
+    text.textContent = r.label;
+
+    links.appendChild(text);
+  });
+}
+
+function syncPanel() {
+  workspace.classList.toggle("has-selection", selected !== null);
+
+  const p = people.find(x => x.id === selected);
+
+  $("fullName").value = p?.name || "";
+  $("birth").value = p?.birth || "";
+  $("death").value = p?.death || "";
+
+  $("colors").querySelectorAll("button").forEach(b => {
+    b.setAttribute(
+      "aria-pressed",
+      String(b.dataset.tone === p?.tone)
+    );
+  });
+
+  const r = relations.find(x => x.id === selectedRelation);
+  $("relationName").value = r?.label || "";
+}
+
+function persist() {
+  try {
+    localStorage.setItem(
+      "familienatlas-v2",
+      JSON.stringify({people, relations, nextId})
+    );
+
+    $("status").textContent =
+      "Gespeichert · " + new Date().toLocaleTimeString("de-DE");
+  } catch(e) {
+    $("status").textContent = "Speichern nicht möglich.";
+  }
+}
+
+function addPerson() {
+  const id = nextId++;
+
+  people.push({
+    id,
+    name: "Neue Person",
+    birth: "",
+    death: "",
+    tone: "white",
+    x: 250 + Math.random() * 400,
+    y: 200 + Math.random() * 300,
+    w: 190,
+    h: 112
+  });
+
+  selected = id;
+  selectedRelation = null;
+
+  render();
+  syncPanel();
+  persist();
+}
+
+function updatePerson(key, value) {
+  const p = people.find(x => x.id === selected);
+  if (!p) return;
+
+  p[key] = value;
+  render();
+  syncPanel();
+  persist();
+}
+
+$("fullName").addEventListener("input", e =>
+  updatePerson("name", e.target.value)
+);
+
+$("birth").addEventListener("change", e =>
+  updatePerson("birth", e.target.value)
+);
+
+$("death").addEventListener("change", e =>
+  updatePerson("death", e.target.value)
+);
+
+$("colors").addEventListener("click", e => {
+  const b = e.target.closest("[data-tone]");
+  if (!b || selected === null) return;
+  updatePerson("tone", b.dataset.tone);
 });
-$("nodes").addEventListener("pointercancel",()=>{drag=null;relationDrag=null;drawLinks();});
-function syncPanel(){const p=people.find(x=>x.id===selected);$("fullName").value=p?.name||"";$("birth").value=p?.birth||"";$("death").value=p?.death||"";$("colors").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.tone===p?.tone)));const r=relations.find(x=>x.id===selectedRelation);$("relationName").value=r?.label||"";$("relationHelp").textContent=r?"Bezeichnung der ausgewählten Verbindung bearbeiten.":"Wähle mehrere Personen rechts aus, um eine gemeinsame Verbindung zu erstellen, oder zeichne eine Verbindung."; }
-function persist(){try{localStorage.setItem("familienatlas-v1",JSON.stringify({people,relations,nextId}));$("status").textContent="Gespeichert · "+new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});}catch(e){}}
-function addPerson(){const id=nextId++;people.push({id,name:"Neue Person",birth:"",death:"",tone:"white",x:180+Math.random()*400,y:180+Math.random()*280});selected=id;selectedRelation=null;syncPanel();render();persist();}
-function chooseConnection(id){if(connectFirst===null){connectFirst=id;$("tip").textContent="Jetzt die zweite Person auswählen …";render();return;}if(connectFirst===id){connectFirst=null;render();return;}const label=prompt("Wie soll diese Beziehung heißen?","Verwandt mit");if(label!==null){relations.push({id:Date.now(),from:connectFirst,to:id,label:label.trim()||"Verbunden mit"});selectedRelation=relations[relations.length-1].id;}connectFirst=null;connectMode=false;$("connectBtn").classList.remove("active");$("tip").textContent="Beziehung erstellt. Du kannst ihre Bezeichnung rechts bearbeiten.";syncPanel();render();persist();}
-$("addBtn").onclick=addPerson;
-$("connectBtn").onclick=()=>{connectMode=!connectMode;connectFirst=null;$("connectBtn").classList.toggle("active",connectMode);$("tip").textContent=connectMode?"Apple Pencil: Von einem Kasten zum anderen ziehen. Finger/Maus: Zwei Personen nacheinander antippen.":"Ziehe Kästen oder wähle eine Person aus.";};
-$("fullName").oninput=e=>updatePerson("name",e.target.value);$("birth").onchange=e=>updatePerson("birth",e.target.value);$("death").onchange=e=>updatePerson("death",e.target.value);
-function updatePerson(k,v){const p=people.find(x=>x.id===selected);if(!p)return;p[k]=v;render();persist();}
-$("colors").onclick=e=>{const b=e.target.closest("button[data-tone]");if(!b)return;updatePerson("tone",b.dataset.tone);syncPanel();};
-$("relationName").oninput=e=>{const r=relations.find(x=>x.id===selectedRelation);if(r){r.label=e.target.value;drawLinks();persist();}};
-$("createGroupRelationBtn").onclick=()=>{
- const ids=Array.from($("relationPeople").selectedOptions).map(o=>Number(o.value));
- if(ids.length<2){alert("Bitte wähle mindestens zwei Personen aus.");return;}
- const label=$("relationName").value.trim()||"Verbunden mit";
- const relation={id:Date.now(),people:ids,label};
- relations.push(relation);selectedRelation=relation.id;selected=null;
- syncPanel();render();persist();
+
+$("relationName").addEventListener("input", e => {
+  const r = relations.find(x => x.id === selectedRelation);
+  if (!r) return;
+
+  r.label = e.target.value;
+  drawLinks();
+  persist();
+});
+
+$("deletePersonBtn").onclick = () => {
+  if (selected === null) return;
+  if (!confirm("Diese Person wirklich löschen?")) return;
+
+  people = people.filter(p => p.id !== selected);
+  relations = relations.filter(
+    r => r.from !== selected && r.to !== selected
+  );
+
+  selected = null;
+  selectedRelation = null;
+
+  render();
+  syncPanel();
+  persist();
 };
-$("deletePersonBtn").onclick=()=>{if(!selected)return;if(!confirm("Diese Person und ihre Verbindungen löschen?"))return;people=people.filter(p=>p.id!==selected);relations=relations.map(r=>({...r,people:(Array.isArray(r.people)?r.people:[r.from,r.to]).filter(id=>id!==selected)})).filter(r=>(r.people||[]).length>=2);selected=null;syncPanel();render();persist();};
-$("deleteRelationBtn").onclick=()=>{if(!selectedRelation)return;relations=relations.filter(r=>r.id!==selectedRelation);selectedRelation=null;syncPanel();drawLinks();persist();};
-$("canvas").onclick=e=>{if(e.target.id==="canvas"||e.target.id==="world"||e.target.id==="links"){selected=null;selectedRelation=null;syncPanel();render();}};
-function applyTransform(){$("world").style.transform=`translate(${offset.x}px,${offset.y}px) scale(${scale})`;$("zoomLabel").textContent=Math.round(scale*100)+"%";}
-function fit(){if(!people.length)return;let minX=Math.min(...people.map(p=>p.x)),minY=Math.min(...people.map(p=>p.y)),maxX=Math.max(...people.map(p=>p.x+190)),maxY=Math.max(...people.map(p=>p.y+120));const rect=$("canvas").getBoundingClientRect();scale=Math.min(1.1,(rect.width-100)/(maxX-minX+100),(rect.height-100)/(maxY-minY+100));scale=Math.max(.45,scale);offset={x:(rect.width-(maxX-minX)*scale)/2-minX*scale,y:Math.max(65,(rect.height-(maxY-minY)*scale)/2-minY*scale)};applyTransform();}
-$("fitBtn").onclick=fit;$("zoomIn").onclick=()=>{scale=Math.min(1.8,scale+.1);applyTransform();};$("zoomOut").onclick=()=>{scale=Math.max(.35,scale-.1);applyTransform();};
-$("clearBtn").onclick=()=>{if(confirm("Beispiel-Stammbaum wiederherstellen?")){init();persist();}};
-$("saveBtn").onclick=()=>{const blob=new Blob([JSON.stringify({people,relations},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="mein-stammbaum.json";a.click();URL.revokeObjectURL(a.href);};
-$("loadBtn").onclick=()=>$("fileInput").click();$("fileInput").onchange=e=>{const f=e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(!Array.isArray(data.people)||!Array.isArray(data.relations))throw Error();people=data.people;relations=data.relations.map(r=>({...r,people:Array.isArray(r.people)?r.people:[r.from,r.to]}));nextId=Math.max(0,...people.map(p=>p.id))+1;selected=null;selectedRelation=null;syncPanel();render();fit();persist();}catch(err){alert("Die Datei konnte nicht gelesen werden.");}};reader.readAsText(f);};
-try{const saved=JSON.parse(localStorage.getItem("familienatlas-v1"));if(saved&&Array.isArray(saved.people)){people=saved.people;relations=saved.relations||[];nextId=saved.nextId||Math.max(0,...people.map(p=>p.id))+1;render();fit();}else init();}catch(e){init();}
-window.addEventListener("resize",()=>applyTransform());
+
+$("deleteRelationBtn").onclick = () => {
+  if (selectedRelation === null) return;
+
+  relations = relations.filter(r => r.id !== selectedRelation);
+  selectedRelation = null;
+
+  render();
+  syncPanel();
+  persist();
+};
+
+function selectPerson(id) {
+  selected = id;
+  selectedRelation = null;
+  syncPanel();
+  render();
+}
+
+function capturePointer(e) {
+  try {
+    canvas.setPointerCapture(e.pointerId);
+  } catch(err) {}
+}
+
+function startMove(id, e) {
+  const p = people.find(x => x.id === id);
+  if (!p) return;
+
+  selectPerson(id);
+
+  drag = {
+    id,
+    startX: e.clientX,
+    startY: e.clientY,
+    origX: p.x,
+    origY: p.y
+  };
+}
+
+function startResize(id, e) {
+  const p = people.find(x => x.id === id);
+  if (!p) return;
+
+  selectPerson(id);
+
+  resizeDrag = {
+    id,
+    startX: e.clientX,
+    startY: e.clientY,
+    startW: p.w || 190,
+    startH: p.h || 112
+  };
+}
+
+function startRelation(id, e) {
+  relationDrag = {
+    from: id,
+    pointerId: e.pointerId
+  };
+
+  suppressClick = true;
+  capturePointer(e);
+}
+
+function finishRelation(e) {
+  if (!relationDrag) return;
+
+  const from = relationDrag.from;
+  relationDrag = null;
+
+  const hit = document.elementFromPoint(e.clientX, e.clientY);
+  const target = hit?.closest(".person");
+
+  if (target && Number(target.dataset.id) !== from) {
+    const to = Number(target.dataset.id);
+
+    const label = prompt(
+      "Wie soll diese Beziehung heißen?",
+      "Verwandt mit"
+    );
+
+    if (label !== null) {
+      const r = {
+        id: Date.now(),
+        from,
+        to,
+        label: label.trim() || "Verbunden mit"
+      };
+
+      relations.push(r);
+      selected = null;
+      selectedRelation = r.id;
+
+      syncPanel();
+      persist();
+    }
+  }
+
+  render();
+
+  setTimeout(() => {
+    suppressClick = false;
+  }, 150);
+}
+
+// START: FINGER, MAUS UND APPLE PENCIL
+canvas.addEventListener("pointerdown", e => {
+  const card = e.target.closest(".person");
+
+  // APPLE PENCIL: Beziehungen zeichnen
+  if (e.pointerType === "pen") {
+    if (card) {
+      e.preventDefault();
+      startRelation(Number(card.dataset.id), e);
+    }
+    return;
+  }
+
+  // TOUCH: Finger erfassen
+  if (e.pointerType === "touch") {
+    e.preventDefault();
+    capturePointer(e);
+
+    touchPoints.set(e.pointerId, {
+      x: e.clientX,
+      y: e.clientY
+    });
+
+    // Zwei Finger: Zoom und Verschieben
+    if (touchPoints.size === 2) {
+      drag = null;
+      resizeDrag = null;
+
+      const pts = [...touchPoints.values()];
+      const center = {
+        x: (pts[0].x + pts[1].x) / 2,
+        y: (pts[0].y + pts[1].y) / 2
+      };
+
+      const distance = Math.hypot(
+        pts[1].x - pts[0].x,
+        pts[1].y - pts[0].y
+      );
+
+      pinch = {
+        distance,
+        scale,
+        worldX: (center.x - offset.x) / scale,
+        worldY: (center.y - offset.y) / scale
+      };
+
+      return;
+    }
+
+    // Nur ein Finger
+    if (touchPoints.size === 1 && card) {
+      const id = Number(card.dataset.id);
+
+      if (e.target.closest(".resize-handle")) {
+        startResize(id, e);
+      } else {
+        startMove(id, e);
+      }
+    }
+
+    return;
+  }
+
+  // MAUS
+  if (e.pointerType === "mouse" && card) {
+    capturePointer(e);
+
+    const id = Number(card.dataset.id);
+
+    if (e.target.closest(".resize-handle")) {
+      startResize(id, e);
+    } else {
+      startMove(id, e);
+    }
+  }
+}, {passive: false});
+
+// BEWEGUNG
+canvas.addEventListener("pointermove", e => {
+
+  // APPLE PENCIL: Vorschau der Beziehung
+  if (relationDrag && e.pointerType === "pen") {
+    const a = people.find(p => p.id === relationDrag.from);
+    if (!a) return;
+
+    const rect = world.getBoundingClientRect();
+
+    const x1 = a.x + (a.w || 190) / 2;
+    const y1 = a.y + (a.h || 112) / 2;
+    const x2 = (e.clientX - rect.left) / scale;
+    const y2 = (e.clientY - rect.top) / scale;
+
+    drawLinks();
+
+    const line = document.createElementNS(
+      "http://www.w3.org/2000/svg", "path"
+    );
+
+    line.setAttribute("d", `M ${x1} ${y1} L ${x2} ${y2}`);
+    line.setAttribute("stroke", "#b17a39");
+    line.setAttribute("stroke-width", "3");
+    line.setAttribute("stroke-dasharray", "7 5");
+    line.setAttribute("fill", "none");
+
+    links.appendChild(line);
+    return;
+  }
+
+  // TOUCH: Position aktualisieren
+  if (e.pointerType === "touch") {
+    if (!touchPoints.has(e.pointerId)) return;
+
+    touchPoints.set(e.pointerId, {
+      x: e.clientX,
+      y: e.clientY
+    });
+
+    // Zwei Finger: Zoom und Verschieben
+    if (touchPoints.size === 2 && pinch) {
+      const pts = [...touchPoints.values()];
+
+      const center = {
+        x: (pts[0].x + pts[1].x) / 2,
+        y: (pts[0].y + pts[1].y) / 2
+      };
+
+      const distance = Math.hypot(
+        pts[1].x - pts[0].x,
+        pts[1].y - pts[0].y
+      );
+
+      const factor = distance / pinch.distance;
+
+      scale = Math.max(
+        0.25,
+        Math.min(2.5, pinch.scale * factor)
+      );
+
+      offset.x = center.x - pinch.worldX * scale;
+      offset.y = center.y - pinch.worldY * scale;
+
+      applyTransform();
+      return;
+    }
+
+    if (touchPoints.size !== 1) return;
+  }
+
+  // KASTEN GRÖSSER ODER KLEINER ZIEHEN
+  if (resizeDrag) {
+    const p = people.find(x => x.id === resizeDrag.id);
+    if (!p) return;
+
+    p.w = Math.max(
+      150,
+      Math.min(
+        500,
+        resizeDrag.startW +
+        (e.clientX - resizeDrag.startX) / scale
+      )
+    );
+
+    p.h = Math.max(
+      100,
+      Math.min(
+        400,
+        resizeDrag.startH +
+        (e.clientY - resizeDrag.startY) / scale
+      )
+    );
+
+    const el = nodes.querySelector(`[data-id="${p.id}"]`);
+
+    if (el) {
+      el.style.width = p.w + "px";
+      el.style.height = p.h + "px";
+    }
+
+    drawLinks();
+    suppressClick = true;
+    return;
+  }
+
+  // PERSONENKASTEN VERSCHIEBEN
+  if (drag) {
+    const p = people.find(x => x.id === drag.id);
+    if (!p) return;
+
+    p.x = Math.max(
+      0,
+      drag.origX + (e.clientX - drag.startX) / scale
+    );
+
+    p.y = Math.max(
+      0,
+      drag.origY + (e.clientY - drag.startY) / scale
+    );
+
+    const el = nodes.querySelector(`[data-id="${p.id}"]`);
+
+    if (el) {
+      el.style.left = p.x + "px";
+      el.style.top = p.y + "px";
+    }
+
+    drawLinks();
+    suppressClick = true;
+  }
+});
+
+// ENDE EINER BERÜHRUNG
+function finishPointer(e) {
+  if (relationDrag && e.pointerType === "pen") {
+    finishRelation(e);
+    return;
+  }
+
+  if (e.pointerType === "touch") {
+    touchPoints.delete(e.pointerId);
+
+    drag = null;
+    resizeDrag = null;
+    pinch = null;
+
+    if (touchPoints.size === 0) persist();
+    return;
+  }
+
+  if (resizeDrag) {
+    resizeDrag = null;
+    persist();
+  }
+
+  if (drag) {
+    drag = null;
+    persist();
+  }
+}
+
+canvas.addEventListener("pointerup", finishPointer);
+
+canvas.addEventListener("pointercancel", e => {
+  touchPoints.delete(e.pointerId);
+
+  drag = null;
+  resizeDrag = null;
+  relationDrag = null;
+  pinch = null;
+
+  drawLinks();
+});
+
+// LEERE FLÄCHE ANTIPPen
+canvas.addEventListener("click", e => {
+  if (suppressClick) {
+    suppressClick = false;
+    return;
+  }
+
+  if (
+    e.target === canvas ||
+    e.target === world ||
+    e.target === links ||
+    e.target === nodes
+  ) {
+    selected = null;
+    selectedRelation = null;
+    syncPanel();
+    render();
+  }
+});
+
+// ZOOM
+function applyTransform() {
+  world.style.transform =
+    `translate(${offset.x}px,${offset.y}px) scale(${scale})`;
+
+  $("zoomLabel").textContent =
+    Math.round(scale * 100) + "%";
+}
+
+function zoomAtCenter(change) {
+  const rect = canvas.getBoundingClientRect();
+  const cx = rect.width / 2;
+  const cy = rect.height / 2;
+
+  const wx = (cx - offset.x) / scale;
+  const wy = (cy - offset.y) / scale;
+
+  scale = Math.max(0.25, Math.min(2.5, scale + change));
+
+  offset.x = cx - wx * scale;
+  offset.y = cy - wy * scale;
+
+  applyTransform();
+}
+
+$("zoomIn").onclick = () => zoomAtCenter(0.15);
+$("zoomOut").onclick = () => zoomAtCenter(-0.15);
+
+// STAMMBAUM EINPASSEN
+function fit() {
+  if (!people.length) return;
+
+  const minX = Math.min(...people.map(p => p.x));
+  const minY = Math.min(...people.map(p => p.y));
+
+  const maxX = Math.max(...people.map(p => p.x + (p.w || 190)));
+  const maxY = Math.max(...people.map(p => p.y + (p.h || 112)));
+
+  const rect = canvas.getBoundingClientRect();
+
+  scale = Math.min(
+    1.2,
+    (rect.width - 100) / (maxX - minX + 100),
+    (rect.height - 100) / (maxY - minY + 100)
+  );
+
+  scale = Math.max(0.25, scale);
+
+  offset.x =
+    (rect.width - (maxX - minX) * scale) / 2 - minX * scale;
+
+  offset.y =
+    (rect.height - (maxY - minY) * scale) / 2 - minY * scale;
+
+  applyTransform();
+}
+
+$("fitBtn").onclick = fit;
+
+$("resetBtn").onclick = () => {
+  if (confirm("Beispiel-Stammbaum wiederherstellen?")) {
+    example();
+  }
+};
+
+// EXPORT
+$("saveBtn").onclick = () => {
+  const blob = new Blob(
+    [JSON.stringify({people, relations, nextId}, null, 2)],
+    {type: "application/json"}
+  );
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = "mein-stammbaum.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+};
+
+// IMPORT
+$("loadBtn").onclick = () => $("fileInput").click();
+
+$("fileInput").onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+
+      if (
+        !Array.isArray(data.people) ||
+        !Array.isArray(data.relations)
+      ) {
+        throw new Error("Ungültige Datei");
+      }
+
+      people = data.people.map(p => ({
+        w: 190,
+        h: 112,
+        ...p
+      }));
+
+      relations = data.relations;
+
+      nextId = Math.max(
+        0,
+        ...people.map(p => Number(p.id) || 0)
+      ) + 1;
+
+      selected = null;
+      selectedRelation = null;
+
+      render();
+      syncPanel();
+      fit();
+      persist();
+
+    } catch(err) {
+      alert("Die Datei konnte nicht gelesen werden.");
+    }
+
+    e.target.value = "";
+  };
+
+  reader.readAsText(file);
+};
+
+$("addBtn").onclick = addPerson;
+
+// GESPEICHERTE DATEN LADEN
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem("familienatlas-v2");
+
+    if (!raw) {
+      example();
+      return;
+    }
+
+    const data = JSON.parse(raw);
+
+    if (!Array.isArray(data.people)) {
+      example();
+      return;
+    }
+
+    people = data.people.map(p => ({
+      w: 190,
+      h: 112,
+      ...p
+    }));
+
+    relations = Array.isArray(data.relations)
+      ? data.relations
+      : [];
+
+    nextId = data.nextId ||
+      Math.max(0, ...people.map(p => p.id)) + 1;
+
+    render();
+    syncPanel();
+    fit();
+
+  } catch(e) {
+    example();
+  }
+}
+
+window.addEventListener("resize", applyTransform);
+
+loadSaved();
+
 })();
 </script>
+
 </body>
 </html>
