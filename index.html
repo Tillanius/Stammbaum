@@ -611,6 +611,91 @@ hr {
   background:rgba(180,180,188,.65);
   border-radius:10px;
 }
+
+.person .profile-open {
+  position:absolute;
+  right:9px;
+  top:8px;
+  width:29px;
+  height:29px;
+  padding:0;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(52,118,90,.18);
+  border-radius:9px;
+  color:#34765a;
+  background:rgba(255,255,255,.78);
+  font-size:15px;
+  z-index:3;
+  cursor:pointer;
+}
+.person .profile-open:hover {background:#e9f3ed;border-color:#9bbba5}
+.person .name {padding-right:27px}
+.profile-overlay {
+  position:fixed;
+  inset:0;
+  z-index:2000;
+  display:none;
+  overflow-y:auto;
+  background:#f5f5f7;
+}
+.profile-overlay.open {display:block;animation:overlayIn .18s ease}
+.profile-topbar {
+  position:sticky;
+  top:0;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px max(20px,calc((100vw - 1000px)/2));
+  background:rgba(255,255,255,.9);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(18px);
+}
+.profile-content {width:min(1000px,calc(100% - 36px));margin:30px auto 60px}
+.profile-heading {margin-bottom:24px}
+.profile-heading h1 {font-size:clamp(27px,5vw,38px);letter-spacing:-1px;margin:0 0 6px}
+.profile-heading p {margin:0;color:#85858c;font-size:13px}
+.profile-grid {display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:20px;align-items:start}
+.profile-card {
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(220,220,225,.8);
+  border-radius:20px;
+  padding:22px;
+  box-shadow:0 8px 28px rgba(0,0,0,.045);
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.profile-card h2 {font-size:17px;margin:0;letter-spacing:-.3px}
+.profile-fields {display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.profile-fields .field.full {grid-column:1/-1}
+.profile-fields textarea {
+  width:100%;min-height:105px;resize:vertical;
+  border:1px solid rgba(210,210,218,.8);border-radius:11px;
+  padding:10px 11px;font:13px inherit;color:var(--text);
+  background:rgba(255,255,255,.65)
+}
+.profile-fields textarea:focus {outline:none;border-color:#75a88b;box-shadow:0 0 0 3px rgba(52,118,90,.1)}
+.photo-toolbar {display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.photo-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:10px}
+.photo-item {position:relative;aspect-ratio:1;border-radius:13px;overflow:hidden;background:#f0f0f2}
+.photo-item img {width:100%;height:100%;object-fit:cover;display:block}
+.photo-remove {
+  position:absolute;right:6px;top:6px;width:27px;height:27px;padding:0;
+  border:0;border-radius:50%;background:rgba(0,0,0,.62);color:white;font-size:17px
+}
+.photo-empty {padding:24px 12px;text-align:center;color:#929299;font-size:12px;border:1px dashed #d5d5da;border-radius:13px}
+.profile-save-note {font-size:11px;color:#88888e;margin:0}
+@media(max-width:700px) {
+  .profile-grid {grid-template-columns:1fr}
+  .profile-fields {grid-template-columns:1fr}
+  .profile-fields .field.full {grid-column:auto}
+  .profile-topbar {padding:12px 15px}
+  .profile-content {margin-top:20px}
+}
+
 @media(max-width:850px) {
   header {
     height:auto;
@@ -788,6 +873,45 @@ hr {
     </div>
     <div class="status" id="status">Lokal gespeichert.</div>
   </aside>
+</div>
+
+
+<div class="profile-overlay" id="profileOverlay" aria-hidden="true">
+  <div class="profile-topbar">
+    <button id="profileBackBtn">← Stammbaum</button>
+    <strong>Personenprofil</strong>
+    <button class="primary" id="profileDoneBtn">Fertig</button>
+  </div>
+  <div class="profile-content">
+    <div class="profile-heading">
+      <h1 id="profileTitle">Personenprofil</h1>
+      <p>Fotos und persönliche Erinnerungen zu dieser Person</p>
+    </div>
+    <div class="profile-grid">
+      <section class="profile-card">
+        <h2>Persönliche Informationen</h2>
+        <div class="profile-fields">
+          <div class="field full"><label for="profileFullName">Vollständiger Name</label><input id="profileFullName" placeholder="Vor- und Nachname"></div>
+          <div class="field"><label for="profileBirthName">Geburtsname</label><input id="profileBirthName" placeholder="Geburtsname"></div>
+          <div class="field"><label for="profileBirth">Geboren</label><input id="profileBirth" placeholder="z. B. 12.05.1940"></div>
+          <div class="field"><label for="profileBirthPlace">Geburtsort</label><input id="profileBirthPlace" placeholder="Geburtsort"></div>
+          <div class="field"><label for="profileDeath">Gestorben</label><input id="profileDeath" placeholder="optional"></div>
+          <div class="field"><label for="profileDeathPlace">Sterbeort</label><input id="profileDeathPlace" placeholder="Sterbeort"></div>
+          <div class="field"><label for="profileOccupation">Beruf</label><input id="profileOccupation" placeholder="Beruf oder Tätigkeit"></div>
+          <div class="field full"><label for="profileStory">Lebensgeschichte und Erinnerungen</label><textarea id="profileStory" placeholder="Was sollte über diese Person festgehalten werden?"></textarea></div>
+        </div>
+        <p class="profile-save-note">Änderungen werden automatisch lokal gespeichert.</p>
+      </section>
+      <section class="profile-card">
+        <div class="photo-toolbar">
+          <h2>Fotos</h2>
+          <button class="primary" id="addPhotosBtn">＋ Fotos hinzufügen</button>
+          <input type="file" id="profilePhotoInput" accept="image/*" multiple hidden>
+        </div>
+        <div class="photo-grid" id="profilePhotoGrid"></div>
+      </section>
+    </div>
+  </div>
 </div>
 
 <div class="export-overlay" id="exportOverlay">
@@ -995,8 +1119,14 @@ function render() {
         ${p.birth ? "✳ "+fmt(p.birth) : "Geburtsdatum unbekannt"}
         ${p.death ? "<br>✝ "+fmt(p.death) : ""}
       </div>
+      <button class="profile-open" type="button" title="Personenprofil öffnen" aria-label="Personenprofil öffnen">↗</button>
       <div class="resize-handle"></div>
     `;
+
+    el.querySelector(".profile-open").addEventListener("click", e => {
+      e.stopPropagation();
+      openProfile(p.id);
+    });
 
     nodes.appendChild(el);
   });
@@ -1475,6 +1605,7 @@ function moveHubToPointer(e) {
 
 canvas.addEventListener("pointerdown",e => {
   const card = e.target.closest(".person");
+  if (e.target.closest(".profile-open")) return;
 
   if (e.pointerType === "pen") {
     if (card) {
@@ -1757,6 +1888,124 @@ $("fitBtn").onclick = fit;
 $("resetBtn").onclick = () => {
   if (confirm("Beispiel-Stammbaum wiederherstellen?")) example();
 };
+
+
+/* PERSONENPROFILE */
+
+let activeProfileId = null;
+
+function openProfile(id) {
+  const p = getPerson(id);
+  if (!p) return;
+  activeProfileId = id;
+  const fields = {
+    profileFullName:p.name,
+    profileBirthName:p.birthName,
+    profileBirth:p.birth,
+    profileBirthPlace:p.birthPlace,
+    profileDeath:p.death,
+    profileDeathPlace:p.deathPlace,
+    profileOccupation:p.occupation,
+    profileStory:p.story
+  };
+  Object.entries(fields).forEach(([key,value]) => { $(key).value = value || ""; });
+  $("profileTitle").textContent = p.name || "Unbenannte Person";
+  renderProfilePhotos();
+  $("profileOverlay").classList.add("open");
+  $("profileOverlay").setAttribute("aria-hidden","false");
+}
+
+function closeProfile() {
+  $("profileOverlay").classList.remove("open");
+  $("profileOverlay").setAttribute("aria-hidden","true");
+  activeProfileId = null;
+}
+
+function saveProfileField(key,value) {
+  const p = getPerson(activeProfileId);
+  if (!p) return;
+  p[key] = value;
+  if (key === "name") {
+    $("profileTitle").textContent = value || "Unbenannte Person";
+    render();
+  }
+  persist();
+}
+
+[
+  ["profileFullName","name"],
+  ["profileBirthName","birthName"],
+  ["profileBirth","birth"],
+  ["profileBirthPlace","birthPlace"],
+  ["profileDeath","death"],
+  ["profileDeathPlace","deathPlace"],
+  ["profileOccupation","occupation"],
+  ["profileStory","story"]
+].forEach(([id,key]) => {
+  $(id).addEventListener("input",e => saveProfileField(key,e.target.value));
+});
+
+function renderProfilePhotos() {
+  const p = getPerson(activeProfileId);
+  const grid = $("profilePhotoGrid");
+  grid.innerHTML = "";
+  const photos = p?.photos || [];
+  if (!photos.length) {
+    grid.innerHTML = '<div class="photo-empty">Noch keine Fotos vorhanden.<br>Füge Erinnerungsfotos hinzu.</div>';
+    return;
+  }
+  photos.forEach((src,index) => {
+    const item = document.createElement("div");
+    item.className = "photo-item";
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = "Foto "+(index+1);
+    const remove = document.createElement("button");
+    remove.className = "photo-remove";
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.title = "Foto entfernen";
+    remove.onclick = () => {
+      const person = getPerson(activeProfileId);
+      if (!person) return;
+      person.photos.splice(index,1);
+      persist();
+      renderProfilePhotos();
+    };
+    item.append(img,remove);
+    grid.appendChild(item);
+  });
+}
+
+$("addPhotosBtn").onclick = () => $("profilePhotoInput").click();
+$("profilePhotoInput").onchange = async e => {
+  const p = getPerson(activeProfileId);
+  if (!p) return;
+  p.photos = p.photos || [];
+  const files = [...e.target.files].filter(file => file.type.startsWith("image/"));
+  for (const file of files) {
+    try {
+      const dataUrl = await new Promise((resolve,reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      p.photos.push(dataUrl);
+    } catch(err) {
+      alert("Ein Foto konnte nicht geladen werden.");
+    }
+  }
+  persist();
+  renderProfilePhotos();
+  e.target.value = "";
+};
+
+$("profileBackBtn").onclick = closeProfile;
+$("profileDoneBtn").onclick = closeProfile;
+document.addEventListener("keydown",e => {
+  if (e.key === "Escape" && $("profileOverlay").classList.contains("open")) closeProfile();
+});
 
 /* EXPORT-MENÜ */
 
@@ -2085,6 +2334,11 @@ $("fileInput").onchange = e => {
         w:190,
         h:112,
         birthName:"",
+        birthPlace:"",
+        deathPlace:"",
+        occupation:"",
+        story:"",
+        photos:[],
         ...p
       }));
 
@@ -2142,6 +2396,11 @@ function loadSaved() {
       w:190,
       h:112,
       birthName:"",
+      birthPlace:"",
+      deathPlace:"",
+      occupation:"",
+      story:"",
+      photos:[],
       ...p
     }));
 
