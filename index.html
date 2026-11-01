@@ -742,6 +742,14 @@ hr {
     border-radius:21px;
   }
 }
+
+/* Foto-Großansicht */
+.photo-item img{cursor:zoom-in;transition:transform .18s ease}
+.photo-item img:hover{transform:scale(1.035)}
+.photo-lightbox{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(12,14,18,.9);cursor:zoom-out}
+.photo-lightbox.open{display:flex}
+.photo-lightbox img{display:block;max-width:94vw;max-height:90vh;width:auto;height:auto;object-fit:contain;border-radius:8px;box-shadow:0 12px 50px rgba(0,0,0,.45)}
+.photo-lightbox-close{position:absolute;top:18px;right:20px;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.16);color:white;font-size:28px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -914,6 +922,11 @@ hr {
   </div>
 </div>
 
+
+<div class="photo-lightbox" id="photoLightbox" aria-hidden="true" role="dialog" aria-label="Foto in Großansicht">
+  <button class="photo-lightbox-close" id="photoLightboxClose" type="button" aria-label="Schließen">×</button>
+  <img id="photoLightboxImage" alt="Foto in Großansicht">
+</div>
 <div class="export-overlay" id="exportOverlay">
   <div class="export-dialog" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
     <h2 id="exportTitle">Stammbaum exportieren</h2>
@@ -1945,6 +1958,21 @@ function saveProfileField(key,value) {
   $(id).addEventListener("input",e => saveProfileField(key,e.target.value));
 });
 
+
+function openPhotoLightbox(src){
+  const overlay=document.getElementById("photoLightbox");
+  const image=document.getElementById("photoLightboxImage");
+  if(!overlay||!image)return;
+  image.src=src;overlay.classList.add("open");overlay.setAttribute("aria-hidden","false");
+}
+function closePhotoLightbox(){
+  const overlay=document.getElementById("photoLightbox");
+  const image=document.getElementById("photoLightboxImage");
+  if(!overlay)return;
+  overlay.classList.remove("open");overlay.setAttribute("aria-hidden","true");
+  if(image)image.removeAttribute("src");
+}
+
 function renderProfilePhotos() {
   const p = getPerson(activeProfileId);
   const grid = $("profilePhotoGrid");
@@ -1960,12 +1988,15 @@ function renderProfilePhotos() {
     const img = document.createElement("img");
     img.src = src;
     img.alt = "Foto "+(index+1);
+    img.title = "Zum Vergrößern anklicken";
+    img.addEventListener("click", () => openPhotoLightbox(src));
     const remove = document.createElement("button");
     remove.className = "photo-remove";
     remove.type = "button";
     remove.textContent = "×";
     remove.title = "Foto entfernen";
-    remove.onclick = () => {
+    remove.onclick = (event) => {
+      event.stopPropagation();
       const person = getPerson(activeProfileId);
       if (!person) return;
       person.photos.splice(index,1);
@@ -2431,6 +2462,12 @@ window.addEventListener("resize",applyTransform);
 loadSaved();
 
 })();
+
+document.getElementById("photoLightbox").addEventListener("click",closePhotoLightbox);
+document.getElementById("photoLightboxClose").addEventListener("click",closePhotoLightbox);
+document.getElementById("photoLightboxImage").addEventListener("click",e=>e.stopPropagation());
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closePhotoLightbox();});
+
 </script>
 </body>
 </html>
